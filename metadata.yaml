@@ -1,6 +1,6 @@
 ensemble: formula
 name: wordpress
-revision: 28
+revision: 29
 summary: "WordPress is a full featured web blogging tool"
 description: |
  WordPress is a full featured web blogging tool:
