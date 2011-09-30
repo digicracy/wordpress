@@ -52,7 +52,7 @@ apache_template = """\
 def setup_wordpress():
 
     hostname = subprocess.check_output(['hostname','-f']).strip()
-    remote_unit = os.environ.get("ENSEMBLE_REMOTE_UNIT")
+    remote_unit = os.environ.get("JUJU_REMOTE_UNIT")
 
     print "remote unit", remote_unit
 
