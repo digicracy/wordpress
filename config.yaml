@@ -1,0 +1,9 @@
+options:
+  aws-public-key:
+    type: string
+    default: ""
+    description: Amazon Public Key for S3
+  aws-secret-key:
+    type: string
+    default: ""
+    description: Amazon Secret Key for S3

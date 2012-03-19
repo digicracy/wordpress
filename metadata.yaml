@@ -1,12 +1,8 @@
-name: wordpress
-summary: "WordPress is a full featured web blogging tool"
+name: omgubuntu-wp
+summary: "WordPress is a full featured web blogging tool, OMG! Ubuntu! is a blog."
 description: |
- WordPress is a full featured web blogging tool:
- - Instant publishing (no rebuilding)
- - Comment pingback support with spam protection
- - Non-crufty URLs
- - Themable
- - Plugin support
+ WordPress is a full featured web blogging tool.
+ OMG! Ubuntu! is a blog using WordPress
 requires:
   db:
     interface: mysql
