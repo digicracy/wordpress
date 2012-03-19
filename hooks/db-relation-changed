@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 juju-log "We've got a db"
 hostname=`unit-get public-address`
 private_name=`hostname -f`
@@ -51,12 +53,16 @@ rm -rf wordpress
 
 juju-log "Get the last database dump"
 mkdir -p /mnt/restore/
-LATEST=`s3cmd ls s3://omgubuntu.co.uk/backups/ | tail -n 1 | awk '{ print $4 }'`
+LATEST=`s3cmd -c /etc/default/s3cmd ls s3://omgubuntu.co.uk/backups/ | tail -n 1 | awk '{ print $4 }'`
 
 juju-log "$LATEST dump"
-s3cmd $LATEST /mnt/restore/
+s3cmd -c /etc/default/s3cmd get $LATEST /mnt/restore/
+
+juju-log "Extracting"
 tar -xzf /mnt/restore/$(basename $LATEST)
-mysql -h $database -u $user -p$password $database < *.sql
+
+juju-log "Pushing in to MySQL"
+mysql -h $host -u $user -p$password $database < *.sql
 rm -f *.sql
 
 juju-log "Dropping OMG specific files: Themes, plugins, etc in to position"
