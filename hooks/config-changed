@@ -4,8 +4,8 @@ if [ ! -f /etc/default/s3cmd ]; then
 	rsync -avz files/s3cmd /etc/default/
 fi
 
-aws_access_key=`config-get aws_access_key`
-aws_secret_key=`config-get aws_secret_key`
+aws_access_key=`config-get aws-public-key`
+aws_secret_key=`config-get aws-secret-key`
 
 sed -i -e "s@access_key =.*@access_key = $aws_access_key@" \
     -e "s@secret_key =.*@secret_key = $aws_secret_key@" \
