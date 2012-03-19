@@ -1,15 +1,14 @@
 #!/bin/bash
 
 add-apt-repository ppa:charmers/charm-helpers
-add-apt-repository ppa:ondina/server
 
 apt-get update && apt-get -y upgrade
-apt-get -y install apache2 mysql-client pwgen php5 php-apc mailutils php-mail sysstat suphp-common libapache2-mod-suphp php5-mysql php5-mcrypt charm-helper-sh s3cmd
+apt-get -y install apache2 mysql-client pwgen php5 php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd
 
-a2dismod php5
-a2enmod rewrite suphp deflate vhost_alias
+a2enmod rewrite deflate vhost_alias
 
-adduser --disabled-password --force-badname --gecos "OMG! Ubuntu!" omgubuntu
+rm -f /etc/cron.d/php5
+
 service apache2 restart
 
 juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"

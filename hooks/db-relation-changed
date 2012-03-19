@@ -95,8 +95,6 @@ cat > $apache_config_file_path <<EOF
   LogLevel Warn
   ErrorLog /var/log/apache2/omgubuntu.co.uk.error.log
   CustomLog /var/log/apache2/omgubuntu.co.uk.access.log combined
-  
-  suPHP_UserGroup omgubuntu omgubuntu
 </VirtualHost>
 EOF
 chmod 0644 $apache_config_file_path
@@ -104,7 +102,7 @@ chmod 0644 $apache_config_file_path
 juju-log "Enabling apache site: $hostname"
 a2ensite omgubuntu.co.uk
 
-chown -R omgubuntu.omgubuntu $wp_install_path
+chown -R www-data.www-data $wp_install_path
 
 if [ ! -f /etc/cron.daily/omg-backup ]; then
 	juju-log "Put the backup process in place"
