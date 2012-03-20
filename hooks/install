@@ -5,9 +5,13 @@ add-apt-repository ppa:charmers/charm-helpers
 apt-get update && apt-get -y upgrade
 apt-get -y install apache2 mysql-client pwgen php5 php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd
 
-a2enmod rewrite deflate vhost_alias
+a2enmod rewrite deflate vhost_alias headers expires
 
 rm -f /etc/cron.d/php5
+mv files/apc.ini /etc/php5/conf.d/
+
+mkdir -p /mnt/tmp
+chmod 1777 /mnt/tmp
 
 service apache2 restart
 

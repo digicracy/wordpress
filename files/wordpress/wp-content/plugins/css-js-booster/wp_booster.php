@@ -14,12 +14,12 @@ function callback($buffer) {
 	$types = "js|css|jpg|jpeg|png|html|gif|ico";
 
   // modify buffer here, and then return the updated code
-  $relative = array( "/(href|src)=('|\")\/([^'\"]+)\.(".$types.")('|\")/i", "$1=$2http://cdn.omgubuntu.co.uk/$3.$4$2" );
+  $relative = array( "/(href|src)=('|\")\/((?!wp-admin))([^'\"]+)\.(".$types.")('|\")/i", "$1=$2http://omgubuntu.co.uk.s3.amazonaws.com$3/$4$3.$5$2" );
   $buffer = preg_replace($relative[0], $relative[1], $buffer);
   
-  $absolute = array( '/(href|src)=(\'|")http:\/\/www\.omgubuntu\.co\.uk([^\'|"]+)\.('.$types.')([^\'|"]*)(\'|")/i', "$1=$2http://cdn.omgubuntu.co.uk$3.$4$2" );
+  $absolute = array( '/(href|src)=(\'|")http:\/\/www\.omgubuntu\.co\.uk\/(?!wp-admin)([^\'"]+)(\.('.$types.')([^\'|"]*)(\'|"))/i', "$1=$2http://omgubuntu.co.uk.s3.amazonaws.com/$3.$5$2" );
   $buffer = preg_replace($absolute[0], $absolute[1], $buffer);
-  
+
   return $buffer;
 }
 function buffer_start() { ob_start("callback"); }
