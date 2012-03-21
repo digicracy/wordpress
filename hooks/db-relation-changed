@@ -26,7 +26,6 @@ if [ -z "$database" ] ; then
 fi
 
 secret_key=`pwgen 10 1`
-
 source "/usr/share/charm-helper/sh/net.sh"
 
 ##
@@ -53,7 +52,7 @@ rm -rf wordpress
 
 if [ -f /etc/default/s3cmd ] ; then
 	juju-log "Check if we've actually created this Database before"
-	CUR_TABLE_COUNT=`mysql -h $host -u $user -p$pass -se 'SELECT count(TABLE_NAME) FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`="$database"'`
+	CUR_TABLE_COUNT=`mysql -h $host -u $user -p$password -Nse "SELECT count(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=\"$database\""`
 	if [ $CUR_TABLE_COUNT -eq 0 ]; then
 		juju-log "Get the last database dump"
 		mkdir -p /mnt/restore/
@@ -87,6 +86,8 @@ define('DB_PASSWORD', '$password');
 define('DB_HOST', '$host');
 define('SECRET_KEY', '$secret_key');
 
+define('WP_CACHE', true);
+
 /*
 define('AUTH_KEY', '$secret_key');
 define('SECURE_AUTH_KEY', '$secret_key');
@@ -109,7 +110,6 @@ EOF
 chmod 0644 $config_file_path
 
 # Write the apache config
-# XXX a future branch will change this to use augtool
 apache_config_file_path="/etc/apache2/sites-available/omgubuntu.co.uk"
 juju-log "Writing apache config file $apache_config_file_path"
 cat > $apache_config_file_path <<EOF
