@@ -3,17 +3,19 @@
 add-apt-repository ppa:charmers/charm-helpers
 
 apt-get update && apt-get -y upgrade
-apt-get -y install apache2 mysql-client pwgen php5 php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd
-
-a2enmod rewrite deflate vhost_alias headers expires
+apt-get -y install mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd
 
 rm -f /etc/cron.d/php5
 mv files/apc.ini /etc/php5/conf.d/
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
-a2dissite 000-default
+rm -f /etc/nginx/sites-enabled/*
+install -u root -g root -m 0644 files/omg-nginx /etc/nginx/sites-enabled/omg
+rm -f /etc/php5/fpm/pool.d/*
+install -u root -g root -m 0644 files/omg-php5-fpm.pool.d /etc/php5/fpm/pool.d/www.conf
 
-service apache2 restart
+service php5-fpm restart
+service nginx restart
 
 juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"
