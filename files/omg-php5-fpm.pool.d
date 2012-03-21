@@ -80,7 +80,7 @@ pm = dynamic
 ; CGI.
 ; Note: Used when pm is set to either 'static' or 'dynamic'
 ; Note: This value is mandatory.
-pm.max_children = 20
+pm.max_children = 100
 
 ; The number of child processes created on startup.
 ; Note: Used only when pm is set to 'dynamic'

@@ -1,4 +1,5 @@
 server {
+  listen 8080;
   server_name _;
   access_log /mnt/access.log;
   error_log /mnt/error.log;

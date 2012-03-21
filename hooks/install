@@ -17,6 +17,10 @@ install -o root -g root -m 0644 files/nginx-omg /etc/nginx/sites-enabled/omg
 rm -f /etc/php5/fpm/pool.d/*
 install -o root -g root -m 0644 files/omg-php5-fpm.pool.d /etc/php5/fpm/pool.d/www.conf
 
+rm -f /etc/nginx/sites-available/loadbalancer
+install -o root -g root -m 0644 files/nginx-loadbalancer /etc/nginx/sites-available/loadbalancer
+ln -sf ../sites-available/loadbalancer /etc/nginx/sites-enabled/loadbalancer
+
 service php5-fpm restart
 service nginx restart
 
