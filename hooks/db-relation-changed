@@ -51,19 +51,28 @@ rsync -az wordpress/ $wp_install_path
 juju-log "Clean up"
 rm -rf wordpress
 
-juju-log "Get the last database dump"
-mkdir -p /mnt/restore/
-LATEST=`s3cmd -c /etc/default/s3cmd ls s3://omgubuntu.co.uk/backups/ | tail -n 1 | awk '{ print $4 }'`
+if [ -f /etc/default/s3cmd ] ; then
+	juju-log "Check if we've actually created this Database before"
+	CUR_TABLE_COUNT=`mysql -h $host -u $user -p$pass -se 'SELECT count(TABLE_NAME) FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`="$database"'`
+	if [ $CUR_TABLE_COUNT -eq 0 ]; then
+		juju-log "Get the last database dump"
+		mkdir -p /mnt/restore/
+		LATEST=`s3cmd -c /etc/default/s3cmd ls s3://omgubuntu.co.uk/backups/ | tail -n 1 | awk '{ print $4 }'`
+		juju-log "$LATEST dump"
+		s3cmd -c /etc/default/s3cmd get $LATEST /mnt/restore/
 
-juju-log "$LATEST dump"
-s3cmd -c /etc/default/s3cmd get $LATEST /mnt/restore/
+		juju-log "Extracting"
+		tar -xzf /mnt/restore/$(basename $LATEST)
 
-juju-log "Extracting"
-tar -xzf /mnt/restore/$(basename $LATEST)
-
-juju-log "Pushing in to MySQL"
-mysql -h $host -u $user -p$password $database < *.sql
-rm -f *.sql
+		juju-log "Pushing in to MySQL"
+		mysql -h $host -u $user -p$password $database < *.sql
+		rm -f *.sql
+	else
+		juju-log "I am a not unique, a database already exists"
+	fi
+else
+    juju-log "No AWS Credentials, not restoring database from S3"
+fi
 
 juju-log "Dropping OMG specific files: Themes, plugins, etc in to position"
 rsync -az files/wordpress/ $wp_install_path

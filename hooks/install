@@ -12,6 +12,7 @@ mv files/apc.ini /etc/php5/conf.d/
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
+a2dissite 000-default
 
 service apache2 restart
 
