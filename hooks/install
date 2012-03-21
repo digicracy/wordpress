@@ -10,10 +10,12 @@ mv files/apc.ini /etc/php5/conf.d/
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
+
 rm -f /etc/nginx/sites-enabled/*
-install -u root -g root -m 0644 files/omg-nginx /etc/nginx/sites-enabled/omg
+install -o root -g root -m 0644 files/nginx-omg /etc/nginx/sites-enabled/omg
+
 rm -f /etc/php5/fpm/pool.d/*
-install -u root -g root -m 0644 files/omg-php5-fpm.pool.d /etc/php5/fpm/pool.d/www.conf
+install -o root -g root -m 0644 files/omg-php5-fpm.pool.d /etc/php5/fpm/pool.d/www.conf
 
 service php5-fpm restart
 service nginx restart

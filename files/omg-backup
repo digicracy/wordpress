@@ -6,7 +6,9 @@ DB_PASS=""
 DB_NAME=""
 NOW=`date "+%Y%m%d-%H%M"`
 
-mysqldump -H $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME > /mtn/mysql.$NOW.sql
-tar -czf /mnt/mysql.$NOW.sql.tar.gz /mnt/mysql.$NOW.sql && rm -f /mnt/mysql.$NOW.sql.tar.gz
+cd /mnt
 
-s3cmd put s3://omgubuntu.co.uk/backups/ /mnt/mysql.$NOW.sql.tar.gz
+mysqldump -h $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME > mysql.$NOW.sql
+tar -czf mysql.$NOW.sql.tar.gz mysql.$NOW.sql
+
+s3cmd put mysql.$NOW.sql.tar.gz s3://omgubuntu.co.uk/backups/
