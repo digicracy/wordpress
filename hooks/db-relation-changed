@@ -108,6 +108,8 @@ if ( !defined('ABSPATH') )
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
 
+remove_filter('template_redirect', 'redirect_canonical');
+
 EOF
 chmod 0644 $config_file_path
 
@@ -133,3 +135,4 @@ service nginx restart
 
 # Make it publicly visible, once the wordpress service is exposed
 open-port 80/tcp
+open-port 8080/tcp

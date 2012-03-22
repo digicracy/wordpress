@@ -4,3 +4,5 @@ wp_install_path="/var/www/omgubuntu.co.uk"
 
 juju-log "Upgrading OMG specific files: Themes, plugins, etc in to position"
 rsync -az files/wordpress/ $wp_install_path
+
+chown -R www-data.www-data $wp_install_path
