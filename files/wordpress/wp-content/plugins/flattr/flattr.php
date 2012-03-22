@@ -13,8 +13,6 @@ License: This code is (un)licensed under the kopimi (copyme) non-license; http:/
 Comment: The author of this plugin is not affiliated with the flattr company in whatever meaning.
  */
 
-if (session_id() == '') { session_start(); }
-
 class Flattr
 {
     /**
