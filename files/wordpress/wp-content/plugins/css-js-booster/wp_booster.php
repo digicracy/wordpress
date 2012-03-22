@@ -20,6 +20,9 @@ function callback($buffer) {
   $absolute = array( '/(href|src)=(\'|")http:\/\/www\.omgubuntu\.co\.uk\/(?!wp-admin)([^\'"]+)(\.('.$types.')([^\'|"]*)(\'|"))/i', "$1=$2http://omgubuntu.co.uk.s3.amazonaws.com/$3.$5$2" );
   $buffer = preg_replace($absolute[0], $absolute[1], $buffer);
 
+  $absolute = array( '/(href|src)=(\'|")http:\/\/cdn\.omgubuntu\.co\.uk\/(?!wp-admin)([^\'"]+)(\.('.$types.')([^\'|"]*)(\'|"))/i', "$1=$2http://omgubuntu.co.uk.s3.amazonaws.com/$3.$5$2" );
+  $buffer = preg_replace($absolute[0], $absolute[1], $buffer);
+
   return $buffer;
 }
 function buffer_start() { ob_start("callback"); }
