@@ -4,6 +4,20 @@ set -ue
 
 rm -f /etc/default/s3cmd
 
+flush_opcode=`config-get flush-opcode-cache`
+
+if [ "$flush_opcode" = "True" ]; then
+	juju-log "Flushing OpCode"
+	curl "http://localhost:8080/deets/apc.php?CC=1" > /dev/null
+fi
+
+flush_cache=`config-get flush-wp-cache`
+
+if [ "$flush_cache" = "True" ]; then
+	juju-log "Flushing WordPress Cache"
+	rm -f /var/www/omgubuntu.co.uk/wp-content/cache/wp-cache*.html /var/www/omgubuntu.co.uk/wp-content/cache/supercache/*/index.html*
+fi
+
 aws_access_key=`config-get aws-public-key`
 aws_secret_key=`config-get aws-secret-key`
 
