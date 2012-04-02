@@ -1,2 +1,3 @@
 #!/bin/bash
-service apache2 stop
+
+/etc/cron.daily/omg-backup
