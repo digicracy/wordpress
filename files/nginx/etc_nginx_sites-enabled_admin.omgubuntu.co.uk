@@ -1,6 +1,6 @@
 server {
-  listen 8080;
-  server_name _;
+  listen 80;
+  server_name admin.omgubuntu.co.uk admin-staging.omgubuntu.co.uk;
   access_log /mnt/access.log;
   error_log /mnt/error.log;
   root   /var/www/omgubuntu.co.uk;
@@ -50,10 +50,4 @@ server {
     fastcgi_index index.php;
     include /etc/nginx/fastcgi_params;
   }
-}
-
-server {
-    listen 80;
-    server_name cdn.omgubuntu.co.uk;
-    rewrite ^ $scheme://omgubuntu.co.uk$request_uri permanent;
 }

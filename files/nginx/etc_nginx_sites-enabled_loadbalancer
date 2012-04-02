@@ -7,8 +7,3 @@ server {
   }
 }
 
-server {
-    listen 80;
-    server_name cdn.omgubuntu.co.uk;
-    rewrite ^ $scheme://omgubuntu.co.uk$request_uri permanent;
-}
