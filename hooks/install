@@ -6,20 +6,27 @@ apt-get update && apt-get -y upgrade
 apt-get -y install mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync
 
 rm -f /etc/cron.d/php5
-mv files/apc.ini /etc/php5/conf.d/
+mv files/php/php_conf.d_apc.ini /etc/php5/conf.d/
 
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
 
 rm -f /etc/nginx/sites-enabled/*
-install -o root -g root -m 0644 files/nginx-omg /etc/nginx/sites-enabled/omg
+rm -f /etc/nginx/conf.d/*
 
-rm -f /etc/php5/fpm/pool.d/*
-install -o root -g root -m 0644 files/omg-php5-fpm.pool.d /etc/php5/fpm/pool.d/www.conf
+rm -f /etc/nginx/nginx.conf
+install -o root -g root -m 0644 files/nginx/etc_nginx_nginx.conf /etc/nginx/nginx.conf
+
+rm -f /etc/nginx/sites-available/omgubuntu.co.uk
+install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_omgubuntu.co.uk /etc/nginx/sites-available/omgubuntu.co.uk
+ln -sf ../sites-available/omgubuntu.co.uk /etc/nginx/sites-enabled/omgubuntu.co.uk
 
 rm -f /etc/nginx/sites-available/loadbalancer
-install -o root -g root -m 0644 files/nginx-loadbalancer /etc/nginx/sites-available/loadbalancer
+install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_loadbalancer /etc/nginx/sites-available/loadbalancer
 ln -sf ../sites-available/loadbalancer /etc/nginx/sites-enabled/loadbalancer
+
+rm -f /etc/php5/fpm/pool.d/*
+install -o root -g root -m 0644 files/php/php5-fpm_pool.d_www.conf /etc/php5/fpm/pool.d/www.conf
 
 rsync -avz /var/lib/nginx /mnt/ && rm -rf /var/lib/nginx && ln -s /mnt/nginx /var/lib/
 
