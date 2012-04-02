@@ -34,20 +34,19 @@ server {
 
   location ~ \.php$ {
     try_files $uri @rewrite;
+    include /etc/nginx/fastcgi_params;
     fastcgi_pass unix:/var/run/php5-fpm.sock;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     fastcgi_param SCRIPT_NAME     $fastcgi_script_name;
     fastcgi_param QUERY_STRING    $args;
-    fastcgi_index index.php;
-    include /etc/nginx/fastcgi_params;
   }
 
   location @rewrite {
+    index index.php;
+    include /etc/nginx/fastcgi_params;
     fastcgi_pass unix:/var/run/php5-fpm.sock;
     fastcgi_param SCRIPT_FILENAME $document_root/index.php;
     fastcgi_param SCRIPT_NAME     /index.php;
-    fastcgi_param QUERY_STRING    $args;
-    fastcgi_index index.php;
-    include /etc/nginx/fastcgi_params;
+    fastcgi_param QUERY_STRING    q=$uri&$args;
   }
 }
