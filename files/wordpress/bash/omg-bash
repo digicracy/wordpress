@@ -1,0 +1,722 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/index.html",
+			"settings":
+			{
+				"buffer_size": 1436,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/style.css",
+			"settings":
+			{
+				"buffer_size": 1726,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/base.js",
+			"settings":
+			{
+				"buffer_size": 8738,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/bash.js",
+			"settings":
+			{
+				"buffer_size": 4192,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/fs.js",
+			"settings":
+			{
+				"buffer_size": 2375,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/parsers.js",
+			"settings":
+			{
+				"buffer_size": 3705,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rich/Web/OMGUbuntu/bash/autocomplete.js",
+			"settings":
+			{
+				"buffer_size": 2259,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/Java/JavaC.sublime-build",
+	"file_history":
+	[
+		"/home/rich/Web/lastfm/fest.php",
+		"/home/rich/Downloads/download",
+		"/home/rich/Web/OMGUbuntu/bash/json.js",
+		"/home/rich/Web/OMGUbuntu/bash/jquery.jscrollpane.js",
+		"/home/rich/Web/microfiber/microfiber_s.coffee",
+		"/home/rich/Web/microfiber/microfiber_s.js",
+		"/home/rich/Web/OMGUbuntu/bash/jquery.jscrollpane.min.js",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/style_structure.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/style.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/index.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/functions.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/groups/nokia_high/index.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/header.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/style.css.nokia.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/default/header.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/groups/nokia_high/header.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/groups/nokia_high/styles/baseStyles.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/default/single.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/default/style.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wordpress-mobile-pack/plugins/wpmp_transcoder/wpmp_transcoder.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wordpress-mobile-pack/readme.txt",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/default/index.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/groups/nokia_mid/styles/baseStyles-mid.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobile_pack_base/groups/nokia_mid/styles/reset-mid.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/core/core-header.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wordpress-mobile-pack/wordpress-mobile-pack.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wordpress-mobile-pack/wordpress-mobile-pack.pot",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wordpress-mobile-pack/wordpress_mobile_pack.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/wptouch.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/core/core-styles.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/omgquotes/omgquotes.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/omgquotes/yst_plugin_tools.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/omgquotes/class.quotes.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/core/core.js",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/core/core.min.js",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/include/icons.php",
+		"/home/rich/.cache/.fr-o3VBOU/sencha-touch-1.0.1a/docs/index.html",
+		"/home/rich/.cache/.fr-MRQpU4/cubiq-iscroll-0398d2a/examples/simple/index.html",
+		"/home/rich/.cache/.fr-vjv7V4/cubiq-iscroll-0398d2a/README.md",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/wptouch/themes/default/page.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/themes/mobilo/style.css",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/google-analytics-for-wordpress/googleanalytics.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/ask-ubuntu-hot-widget/class.cachedask.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/omgtwitter/class.twitter.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/google-analytics-for-wordpress/yst_plugin_tools.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/google-analytics-for-wordpress/xmlparser.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/ask-ubuntu-hot-widget/ask-ubuntu-hot-widget.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/disqus-comment-system/lib/wpapi.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/disqus-comment-system/disqus.php",
+		"/home/rich/Web/OMGUbuntu/cache/api.askubuntu.com%2F1.1%2Fquestions-week5bodytrueanswerstrue-25.cache",
+		"/home/rich/omftp",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/ask-ubuntu-hot-widget/ask-ubuntu-random-widget.php",
+		"/home/rich/Web/OMGUbuntu/sigrep/test.html",
+		"/home/rich/Web/OMGUbuntu/sigrep.php",
+		"/home/rich/Web/OMGUbuntu/wp-content/plugins/omgtwitter/twittery.php",
+		"/home/rich/Web/OMGUbuntu/cache/api.askubuntu.com%2F1.1%2Fquestions-hot100bodytrueanswerstrue-25.cache",
+		"/home/rich/Web/OMGUbuntu/cache/api.askubuntu.com%2F1.1%2Fquestions-week100bodytrueanswerstrue-25.cache",
+		"/home/rich/home.html",
+		"/home/rich/save.html",
+		"/home/rich/programming/coffee/network.txt",
+		"/home/rich/programming/coffee/dist.py",
+		"/home/rich/dissertation/networkx-1.3/networkx/algorithms/shortest_paths/astar.py",
+		"/home/rich/dissertation/networkx-1.3/networkx/algorithms/shortest_paths/unweighted.py",
+		"/home/rich/programming/coffee/index.js",
+		"/home/rich/programming/coffee/class.edge.coffee",
+		"/home/rich/programming/coffee/class.octree.coffee",
+		"/home/rich/programming/coffee/class.linlog.coffee",
+		"/home/rich/programming/coffee/class.render3d.coffee",
+		"/home/rich/programming/coffee/class.render2d.coffee",
+		"/home/rich/programming/coffee/class.node.coffee",
+		"/home/rich/programming/coffee/class.eventdriver.coffee",
+		"/home/rich/programming/coffee/index_ol.html",
+		"/home/rich/programming/coffee/class.octree_py.coffee",
+		"/home/rich/Downloads/OOOctree_v.1.py",
+		"/home/rich/.Sublime Text 2/Packages/User/Default (Linux).sublime-keymap",
+		"/home/rich/programming/coffee/cjs/class.spring_clique.js",
+		"/home/rich/programming/coffee/topython.php",
+		"/home/rich/programming/coffee/style.css",
+		"/home/rich/Web/raphael/force/render.three.js",
+		"/home/rich/Web/raphael/force/layout.spring.js",
+		"/home/rich/Web/raphael/force/energy.js",
+		"/home/rich/programming/coffee/python/eventdriver.py",
+		"/home/rich/programming/coffee/python/edge.py",
+		"/home/rich/programming/coffee/python/node.py",
+		"/home/rich/programming/coffee/python/graph.py",
+		"/home/rich/programming/coffee/python/render2d.py",
+		"/home/rich/programming/coffee/python/spring.py",
+		"/home/rich/programming/coffee/python/render3d.py",
+		"/home/rich/programming/coffee/python/testing.py",
+		"/home/rich/programming/python/musicbrowser3.py",
+		"/home/rich/programming/python/musicbrowser.py",
+		"/home/rich/programming/python/calc.py",
+		"/home/rich/Fail/about.html",
+		"/home/rich/programming/coffee/class.springsnar.coffee",
+		"/home/rich/Web/raphael/force/index.html",
+		"/home/rich/Web/port_jun/index.html",
+		"/home/rich/Web/port_aug/index.html",
+		"/home/rich/dissertation/foograph/foograph-read-only/test.html",
+		"/home/rich/Web/raphael/force/layout.spring.old.js",
+		"/home/rich/Web/raphael/force/layout.spring.online.js",
+		"/home/rich/programming/coffee/class.spring.coffee",
+		"/home/rich/programming/coffee/class.graph.coffee",
+		"/home/rich/programming/coffee/README.md",
+		"/home/rich/Web/raphael/force/render.raphael.js",
+		"/home/rich/grade.txt",
+		"/home/rich/programming/coffee/render2d.coffee",
+		"/home/rich/programming/coffee/class.raphael.coffee",
+		"/home/rich/Web/raphael/force/layout.anneal.js",
+		"/home/rich/.Sublime Text 2/Packages/ZenCoding/Default.sublime-keymap",
+		"/home/rich/Web/raphael/force/s3d.js",
+		"/home/rich/programming/coffee/class.graph.js",
+		"/home/rich/programming/coffee/class.edge.js",
+		"/home/rich/programming/coffee/index.html",
+		"/home/rich/Sublime Text 2/Pristine Packages/ZenCoding.sublime-package",
+		"/home/rich/Web/RobinsonsImport/class.quote.php",
+		"/home/rich/Web/raphael/force/layout.anneal.old.js",
+		"/home/rich/Web/raphael/schema2/index.html",
+		"/home/rich/programming/Java/Driver.java",
+		"/home/rich/programming/java_bp/getSumOfNumbers.java",
+		"/home/rich/programming/java_bp/capitalizeFirstLetters.java",
+		"/home/rich/programming/java_bp/getAverage.java",
+		"/home/rich/programming/java_bp/countWaysToJump.java",
+		"/home/rich/programming/java_bp/BetterProgrammerTask.java",
+		"/home/rich/programming/java_bp/countWords.java",
+		"/home/rich/programming/java_bp/getCorrectChange.java",
+		"/home/rich/dissertation/igraph/src/layout.c",
+		"/home/rich/dissertation/igraph/src/igraph.h",
+		"/home/rich/OGDF/src/energybased/FruchtermanReingold.cpp"
+	],
+	"find_in_files":
+	{
+		"include_history":
+		[
+			""
+		],
+		"location_history":
+		[
+			"<open files>",
+			"<open folders>"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"OMG",
+			"scrollTop",
+			"scroll",
+			"console",
+			"fna",
+			"\\n",
+			"include",
+			",modified",
+			"include",
+			"get_directories",
+			" ",
+			"console.log",
+			"name:",
+			"default",
+			"defa",
+			"def",
+			"defaultView",
+			"console",
+			"history",
+			"#output",
+			"<img",
+			"124",
+			"img",
+			"#content",
+			"fo",
+			"#content",
+			"480px;",
+			"font",
+			"fo",
+			"480px;",
+			"font-family",
+			"font",
+			"font-family",
+			"font",
+			"border-top",
+			"#F2",
+			"#F",
+			"#wrap",
+			"#f2",
+			".list",
+			"#header",
+			"wpmp_theme",
+			"$wpmp_theme",
+			"$wpmp_theme_group",
+			"#header",
+			"while",
+			".post-options",
+			"Ubuntu",
+			"Ubuntu' ",
+			"Ubuntu",
+			"x'Ubun",
+			"[^']Ubuntu[^']",
+			"Ubuntu",
+			"font-fami",
+			"font-family:",
+			"font:",
+			".post",
+			".content",
+			"#content",
+			"author",
+			"#main-na",
+			"#main-nvai",
+			".post",
+			"...",
+			"Helvetica",
+			"ref",
+			"refl",
+			"thumb",
+			"a.h2",
+			".post",
+			".post ",
+			".post",
+			"dropfade",
+			"detect",
+			"is_admin",
+			"preg",
+			"interview",
+			"'interview'",
+			"loaded",
+			"print",
+			"warning",
+			"Yoast_Google_Analytics",
+			"get_option\\(('.*')\\);",
+			"get_option('Yoast_Google_Analytics');",
+			"get_option(.+);",
+			"add_ozh_adminmenu_icon",
+			"add_action_link",
+			"db_widget",
+			"for WordPress",
+			"for Wordpress",
+			"Google Analytics",
+			"add_",
+			"add_action",
+			"\\n",
+			"mean when ",
+			"\"title\"",
+			"what does",
+			"position:fixed;",
+			"position:  fixed;",
+			"position: fixed;",
+			"position:fixed;",
+			"primary-menu",
+			"   ",
+			"    ",
+			"console.log",
+			" +",
+			"[2]",
+			"[1]",
+			"[0]",
+			"rhs[",
+			"mat[",
+			"[2]",
+			"[1]",
+			"[0]",
+			"mat[",
+			"mat",
+			"dzx",
+			"dzy",
+			"dyx",
+			"dzy",
+			"deriv",
+			"3d",
+			"2d",
+			" ",
+			"add_node",
+			"first",
+			"dy_dx",
+			".position"
+		],
+		"highlight": false,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"\\\\n",
+			",date",
+			"get_dir_contents",
+			"&nbsp;",
+			"hist",
+			"#scrollback",
+			"Ubuntu', ",
+			"x 'Ubun",
+			"'Ubuntu'",
+			"font-family: Ubuntu,",
+			"font-family: Ubuntu",
+			"get_option('omq_options');",
+			"$1",
+			"'.$this->name_str.'",
+			"\\n\"title\"",
+			"\\t",
+			" ",
+			"z",
+			"y",
+			"x",
+			"rhs.[",
+			"mat.[",
+			"z",
+			"y",
+			"x",
+			"mat.[",
+			"mat.",
+			"dxz",
+			"dyz",
+			"dxy",
+			"dyz",
+			"\n",
+			"\\n",
+			"second",
+			"pos.z",
+			"pos.y",
+			"pos.x",
+			"if $1",
+			"else if ",
+			"else if",
+			"null",
+			"\\t",
+			"@",
+			" ",
+			"\\n",
+			"i",
+			"h",
+			"g",
+			"f",
+			"e",
+			"d",
+			"c",
+			"b",
+			"a",
+			"ad",
+			"ac",
+			"ab",
+			"aa",
+			"z",
+			"y",
+			"x",
+			"w",
+			"v",
+			"u",
+			"t",
+			"s",
+			"r",
+			"q",
+			"p",
+			"o",
+			"n",
+			"m",
+			"l",
+			"k",
+			"j",
+			"f",
+			"o",
+			"coffeescript",
+			"1",
+			"2",
+			"@camera.target",
+			"@",
+			"target",
+			"par2",
+			"text/coffeescript",
+			"delete $1",
+			"text/javascript",
+			"$1",
+			"@",
+			"html",
+			"min",
+			"dy",
+			"cy",
+			"by",
+			"ay",
+			"dx",
+			"cx",
+			"bx",
+			"ax",
+			"is_on_segment",
+			"this.is_3d",
+			"\\n",
+			"y",
+			"x",
+			"    ",
+			",\\n"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer": false,
+		"whole_word": false,
+		"wrap": true
+	},
+	"folders":
+	{
+		"mount_points":
+		[
+			"/home/rich/Web/OMGUbuntu"
+		]
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/home/rich/Web/OMGUbuntu/bash/index.html",
+					"settings":
+					{
+						"buffer_size": 1436,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								50,
+								50
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/home/rich/Web/OMGUbuntu/bash/style.css",
+					"settings":
+					{
+						"buffer_size": 1726,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1579,
+								1579
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 810,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/rich/Web/OMGUbuntu/bash/base.js",
+					"settings":
+					{
+						"buffer_size": 8738,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1558,
+								1558
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/rich/Web/OMGUbuntu/bash/bash.js",
+					"settings":
+					{
+						"buffer_size": 4192,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1596,
+								1599
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/home/rich/Web/OMGUbuntu/bash/fs.js",
+					"settings":
+					{
+						"buffer_size": 2375,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								132,
+								132
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/home/rich/Web/OMGUbuntu/bash/parsers.js",
+					"settings":
+					{
+						"buffer_size": 3705,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								521,
+								521
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/home/rich/Web/OMGUbuntu/bash/autocomplete.js",
+					"settings":
+					{
+						"buffer_size": 2259,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1851,
+								1851
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 571,
+						"zoom_level": 1
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0,
+			1
+		],
+		"rows":
+		[
+			0,
+			1
+		]
+	},
+	"menu_visible": true,
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0,
+		"selected_items":
+		[
+			[
+				"",
+				"/home/rich/Web/raphael/force/enumerate.js"
+			]
+		],
+		"width": 0
+	},
+	"select_project":
+	{
+		"height": 500,
+		"selected_items":
+		[
+			[
+				"",
+				"/home/rich/projects/omgubuntu"
+			]
+		],
+		"width": 380
+	},
+	"show_minimap": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 251,
+	"status_bar_visible": true
+}

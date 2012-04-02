@@ -1,0 +1,26 @@
+#network {
+	display: block;
+	list-style: none;
+	padding: 0px;
+	overflow: hidden;
+}
+	#network li {
+		float: right;
+		margin: 0px;
+		padding: 0px;
+	}
+	#network a {
+		display: block;
+		text-align: center;
+		line-height: 30px;
+		padding: 0px 10px 5px;
+		font-size: 12pt;
+		text-decoration: none;
+	}
+	#network .active a, #network a:hover {
+		background: #772953;
+		color: #fff;
+	}
+	#network a:hover {
+		opacity: 0.8;
+	}
