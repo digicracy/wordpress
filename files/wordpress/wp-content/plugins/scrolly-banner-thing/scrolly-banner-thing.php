@@ -59,7 +59,7 @@ function scrolly_banner_thing_get_content () {
 	
 	$i = 1;
 	foreach ( $options as $k => $v ) {
-		$c = "/go/" . ($i++) . "/" . $v['post'];
+		{$v['post']}
 
 		$content .= "<a id=\"$k\" ";
 		if ( $k == "banner-0" ) $content .= "class=\"opaque\" ";

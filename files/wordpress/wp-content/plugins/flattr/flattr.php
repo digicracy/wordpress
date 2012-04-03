@@ -2,11 +2,11 @@
 /**
  * @package Flattr
  * @author Michael Henke
- * @version 1.0.1
+ * @version 1.1.1
 Plugin Name: Flattr
 Plugin URI: http://wordpress.org/extend/plugins/flattr/
 Description: Give your readers the opportunity to Flattr your effort
-Version: 1.0.1
+Version: 1.1.1
 Author: Michael Henke
 Author URI: http://www.codingmerc.com/tags/flattr/
 License: This code is (un)licensed under the kopimi (copyme) non-license; http://www.kopimi.com. In other words you are free to copy it, taunt it, share it, fork it or whatever. :)
@@ -19,8 +19,8 @@ class Flattr
      * Javascript API URL without protocol part
      */
     const API_SCRIPT  = 'api.flattr.com/js/0.6/load.js?mode=auto';
-    
-    const VERSION = "1.0.1";
+
+    const VERSION = "1.1.1";
 
     /**
      * We should only create Flattr once - make it a singleton
@@ -32,59 +32,52 @@ class Flattr
      * @var String http:// or https:// protocol
      */
     var $proto = "http://";
-    
+
     /**
      * construct and initialize Flattr object
      */
     protected function __construct() {
         if ( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])
             $this->proto = 'https://';
-        
+
         self::default_options();
-        
+
         if (is_admin()) {
             $this->backend();
         } else {
             $this->frontend();
         }
+
         if (empty($this->postMetaHandler)) {
-            require_once($this->getBasePath() . 'postmeta.php');
+            require_once( plugin_dir_path( __FILE__ ) . 'postmeta.php');
             $this->postMetaHandler = new Flattr_PostMeta();
         }
-    }	
-    
+    }
+
     /**
      * prepare Frontend
      */
     protected function frontend() {
-        add_action('wp_enqueue_scripts', array($this, 'insert_script'));
+        if (!in_array(get_option('flattr_button_style'), array('text', 'image'))) {
+            add_action('wp_print_footer_scripts', array($this, 'insert_script'));
+        }
 
         if (get_option('flattr_aut') || get_option('flattr_aut_page')) {
             add_action('the_content', array($this, 'injectIntoTheContent'), 32767);
         }
     }
-    
-    public function getBasePath()
-	{
-		if (!isset($this->basePath))
-		{
-			$this->basePath = WP_PLUGIN_DIR . '/' . plugin_basename( dirname(__FILE__) ) . '/';
-		}
-		
-		return $this->basePath;
-	}
-    
+
     /**
      * prepare Dashboard
      */
     protected function backend() {
+        add_action('wp_print_footer_scripts', array($this, 'insert_script'));
         add_action('admin_init', array($this, 'ajax'));
-        add_action('admin_init', array($this, 'insert_script'));
         add_action('admin_init', array($this, 'insert_wizard'));
         add_action('admin_init', array( $this, 'register_settings') );
         add_action('admin_init', array( $this, 'update_user_meta') );
         add_action('admin_menu', array( $this, 'settings') );
-        
+
         if (ini_get('allow_url_fopen') || function_exists('curl_init'))
             add_action('in_plugin_update_message-flattr/flattr.php', 'flattr_in_plugin_update_message');
     }
@@ -107,7 +100,7 @@ class Flattr
     }
 
     public function ajax () {
-        
+
         if (isset ($_GET["q"], $_GET["flattrJAX"])) {
             define('PASS', "passed");
             define('FAIL', "failed");
@@ -268,7 +261,7 @@ class Flattr
         }
     }
 
-        /**
+    /**
      * initialize default options
      */
     protected static function default_options() {
@@ -278,26 +271,28 @@ class Flattr
         add_option('flattr_aut_page', true);
         add_option('flattr_atags', 'blog');
         add_option('flattr_cat', 'text');
-        add_option('flattr_top', false); 
-        add_option('flattr_compact', false); 
+        add_option('flattr_top', false);
+        add_option('flattr_compact', false);
+        add_option('flattr_popout_enabled', true);
         add_option('flattr_button_style', "js");
         add_option('flattrss_custom_image_url', get_bloginfo('wpurl') . '/wp-content/plugins/flattr/img/flattr-badge-large.png');
         add_option('user_based_flattr_buttons', false);
         add_option('user_based_flattr_buttons_since_time', time());
-
         add_option('flattrss_button_enabled', true);
     }
 
-    /**
-     * Insert Flattr script between <head></head> tags using Wordpress script hooks
-     * @see http://codex.wordpress.org/Function_Reference/wp_enqueue_script
-     */
     public function insert_script() {
-        wp_deregister_script( 'flattrscript' );
-        wp_register_script( 'flattrscript', $this->proto . self::API_SCRIPT);
-        wp_enqueue_script( 'flattrscript' );
+        ?><script type="text/javascript">
+          (function() {
+            var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = '<?php echo $this->proto . self::API_SCRIPT; ?>';
+            t.parentNode.insertBefore(s, t);
+          })();
+        </script><?php
     }
-    
+
     public function insert_wizard() {
         wp_deregister_script( 'jquery-dialog' );
         wp_register_script( 'jquery-dialog', get_bloginfo('wpurl') . '/wp-content/plugins/flattr/jquery-ui-1.8.16.dialog.min.js');
@@ -306,7 +301,7 @@ class Flattr
         wp_register_script( 'flattrscriptwizard', get_bloginfo('wpurl') . '/wp-content/plugins/flattr/wizard.js');
         wp_enqueue_script( 'flattrscriptwizard' );
     }
-    
+
     public function update_user_meta() {
         if (isset($_POST['user_flattr_uid'], $_POST['user_flattr_cat'], $_POST['user_flattr_lng'])) {
             require_once( ABSPATH . WPINC . '/registration.php');
@@ -317,7 +312,6 @@ class Flattr
             update_user_meta( $user_id, "user_flattr_lng", $_POST['user_flattr_lng'] );
         }
     }
-
 
     public function register_settings() {
         register_setting('flattr-settings-group', 'flattr_post_types');
@@ -331,10 +325,11 @@ class Flattr
         register_setting('flattr-settings-group', 'flattr_button_style');
         register_setting('flattr-settings-group', 'flattrss_custom_image_url');
         register_setting('flattr-settings-group', 'user_based_flattr_buttons');
+        register_setting('flattr-settings-group', 'flattrss_button_enabled');
         register_setting('flattr-settings-group', 'flattr_aut_page');
         register_setting('flattr-settings-group', 'flattr_aut');
+        register_setting('flattr-settings-group', 'flattr_popout_enabled');
     }
-
 
     public function settings() {
         $menutitle = __('Flattr', 'flattr');
@@ -346,19 +341,18 @@ class Flattr
             $page = add_submenu_page( "users.php", __('Flattr User Settings'), __('Flattr'), "edit_posts", __FILE__."?user", array($this, 'render_user_settings'));
             add_action( 'admin_print_styles-' . $page, array ($this, 'admin_styles'));
         }
-        
-        $cap = "manage_options";
 
+        $cap = "manage_options";
         add_menu_page('Flattr',  $menutitle, $cap, __FILE__, '', get_bloginfo('wpurl') . '/wp-content/plugins/flattr'.'/img/flattr-icon_new.png');
         $page = add_submenu_page( __FILE__, __('Flattr'), __('Flattr'), $cap, __FILE__, array($this, 'render_settings'));
-        
+
         /**
          * Using registered $page handle to hook stylesheet loading for admin pages
          * @see http://codex.wordpress.org/Function_Reference/wp_enqueue_style
          */
         add_action( 'admin_print_styles-' . $page, array ($this, 'admin_styles'));
     }
-    
+
     /**
      * Include custom styles for admin pages
      */
@@ -390,6 +384,8 @@ class Flattr
      * @return string 
      */
     public function injectIntoTheContent($content) {
+        static $processingPosts = array();
+
         global $post;
 
         if ( post_password_required($post->ID) ) {
@@ -401,6 +397,11 @@ class Flattr
         }
 
         if (in_array(get_post_type(), (array)get_option('flattr_post_types', array())) && !is_feed()) {
+            if (isset($processingPosts[$post->ID])) {
+                return $content;
+            } else {
+                $processingPosts[$post->ID] = true;
+            }
             $button = $this->getButton();
             $button = '<p class="wp-flattr-button">'.$button.'</p>';
 
@@ -410,10 +411,11 @@ class Flattr
             else {
                     $content = $content . $button;
             }
+            unset($processingPosts[$post->ID]);
         }
         return $content;
-    }	
-   
+    }
+
     /**
      * https://flattr.com/submit/auto?user_id=USERNAME&url=URL&title=TITLE&description=DESCRIPTION&language=LANGUAGE&tags=TAGS&hidden=HIDDEN&category=CATEGORY
      * @see http://blog.flattr.net/2011/11/url-auto-submit-documentation/
@@ -435,7 +437,7 @@ class Flattr
         if (!$flattr_uid) {
                 return '';
         }
-        
+
         $selectedLanguage = get_post_meta($post->ID, '_flattr_post_language', true);
         if (empty($selectedLanguage)) {
                 $selectedLanguage = (get_user_meta(get_the_author_meta('ID'), "user_flattr_lng", true)!="")? get_user_meta(get_the_author_meta('ID'), "user_flattr_lng", true): get_option('flattr_lng');
@@ -447,23 +449,30 @@ class Flattr
         if (empty($selectedCategory)) {
                 $selectedCategory = (get_option('user_based_flattr_buttons')&& get_user_meta(get_the_author_meta('ID'), "user_flattr_cat", true)!="")? get_user_meta(get_the_author_meta('ID'), "user_flattr_cat", true): get_option('flattr_cat');
         }
-       
+
         $hidden = get_post_meta($post->ID, '_flattr_post_hidden', true);
         if ($hidden == '') {
                 $hidden = get_option('flattr_hide', false);
         }
 
+        $description = get_the_content('');
+        $description = strip_shortcodes( $description );
+        $description = apply_filters('the_content', $description);
+        $description = str_replace(']]>', ']]&gt;', $description);
+        $description = wp_trim_words( $description, 30, '...' );
+
         $buttonData = array(
 
-                'user_id'	=> $flattr_uid,
-                'url'		=> get_permalink(),
-                'compact'	=> (get_option('flattr_compact', false) ? true : false ),
-                'hidden'	=> $hidden,
-                'language'	=> $selectedLanguage,
-                'category'	=> $selectedCategory,
-                'title'		=> strip_tags(get_the_title()),
-                'description'		=> strip_tags(preg_replace('/\<br\s*\/?\>/i', "\n", $post->post_content)),
-                'tags'		=> trim(strip_tags(get_the_tag_list('', ',', '')) . ',' . $additionalTags, ', ')
+            'user_id'     => $flattr_uid,
+            'popout'      => (get_option('flattr_popout_enabled', true) ? 1 : 0 ),
+            'url'         => get_permalink(),
+            'compact'     => (get_option('flattr_compact', false) ? true : false ),
+            'hidden'      => $hidden,
+            'language'    => $selectedLanguage,
+            'category'    => $selectedCategory,
+            'title'       => strip_tags(get_the_title()),
+            'description' => $description,
+            'tags'        => trim(strip_tags(get_the_tag_list('', ',', '')) . ',' . $additionalTags, ', ')
 
         );
 
@@ -500,10 +509,11 @@ class Flattr
 
     protected function getButtonCode($params)
     {
-            $rev = sprintf('flattr;uid:%s;language:%s;category:%s;',
-                    $params['user_id'],
-                    $params['language'],
-                    $params['category']
+            $rev = sprintf('flattr;uid:%s;popout:%s;language:%s;category:%s;',
+                $params['user_id'],
+                $params['popout'],
+                $params['language'],
+                $params['category']
             );
 
             if (!empty($params['tags']))
@@ -589,7 +599,7 @@ class Flattr
 
         return self::$languages;
     }
-    
+
     protected static $categories;
     public static function getCategories() {
         if (empty(self::$categories)) {
@@ -597,7 +607,7 @@ class Flattr
         }
         return self::$categories;
     }
-    
+
     public function flattr_in_plugin_update_message() {
 
         $url = 'http://plugins.trac.wordpress.org/browser/flattr/trunk/readme.txt?format=txt';
@@ -668,11 +678,11 @@ function flattr_post2rss($content) {
 
     $flattr = "";
     $flattr_post_types = (array)get_option('flattr_post_types', array());
-    
+
     $meta = get_post_meta($post->ID, '_flattr_btn_disable');
-    
+
     $postmeta = isset($meta['_flattr_btn_disable'])? $meta['_flattr_btn_disable'] : true;
-   
+
     if (($postmeta) && is_feed() && in_array(get_post_type(), $flattr_post_types)) {
         $flattr.= ' <p><a href="'. static_flattr_url($post).'" title="Flattr" target="_blank"><img src="'. get_option('flattrss_custom_image_url') .'" alt="flattr this!"/></a></p>';
     }
@@ -692,7 +702,7 @@ function new_flattrss_redirect() {
 
 if(get_option('flattrss_button_enabled')) {
     add_filter('the_content_feed', 'flattr_post2rss',999999);
-    
+
     add_action('atom_entry', 'flattr_feed_atom_item');
     add_action('rss2_item', 'flattr_feed_rss2_item');
 
@@ -710,7 +720,7 @@ function flattr_feed_rss2_item() {
 }
 
 function rss_ns() {
-    //echo 'xmlns:atom="http://www.w3.org/2005/Atom"'; 
+    //echo 'xmlns:atom="http://www.w3.org/2005/Atom"';
 }
 
 
@@ -798,17 +808,17 @@ function new_flattrss_autosubmit_action () {
 
         $oauth_token = get_option('flattrss_api_key');
         $oauth_token_secret = get_option('flattrss_api_secret');
-        
+
         $flattr_access_token = get_option('flattr_access_token');
-        
+
         if (get_option('user_based_flattr_buttons')< strtotime(get_the_time("c",$post))) {
             $user_id = get_current_user_id();
             $flattr_access_token = (get_user_meta( $user_id, "user_flattrss_api_oauth_token",true)!="")?get_user_meta( $user_id, "user_flattrss_api_oauth_token",true):get_option('flattr_access_token');
-         
+
         }
-        
+
         include_once 'flattr_client.php';
-        
+
         $client = new OAuth2Client( array_merge(array(
             'client_id'         => $oauth_token,
             'client_secret'     => $oauth_token_secret,
@@ -845,7 +855,7 @@ function new_flattrss_autosubmit_action () {
         $server = $server[0];
 
         $hidden = (get_option('flattr_hide', true) || get_post_meta($post->ID, '_flattr_post_hidden', true) ||$server == "localhost")? true:false;
-        
+
         try {
             $response = $client->post('/things', array (
                     "url" => $url, 
@@ -861,7 +871,7 @@ function new_flattrss_autosubmit_action () {
                 add_post_meta($post['ID'], "flattrss_autosubmited", "true");
 
         } catch (Exception $e) {
-            
+
         }
     }
 }

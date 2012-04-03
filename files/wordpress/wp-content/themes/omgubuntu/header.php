@@ -60,7 +60,7 @@ s.parentNode.insertBefore(po, s);
 			
 		</div><!-- #masthead -->
 	</div><!-- #header -->
-	
+
 	<div id="main">
 <?php if ( is_sidebar_active('upper-widget-area') ) : ?>
 		<div id="upper" class="widget-area">

@@ -46,4 +46,3 @@ $j(document).ready(function(){
 	$j("ul#sbt-container").sortable({ opacity: 0.6, placeholder: 'sbt-placeholder', forcePlaceholderSize: true, update: function(){updateForm();}});
 
 });
-
