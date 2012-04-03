@@ -18,8 +18,24 @@
 		<a id="ohso-logo" href="http://www.ohso.co">Ohso Ltd.</a>
 	</div>
 <!-- #footer -->
-	
 </div><!-- #wrapper -->	
+
+<!-- start gaug.es -->
+<script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '4f7ac1bef5a1f518e2000048');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+<!-- end gaug.es -->
+
 <?php if ( is_single() ) { ?>
 <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
 <script type="text/javascript">
