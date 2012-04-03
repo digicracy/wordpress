@@ -33,6 +33,7 @@ rm -f /etc/php5/fpm/pool.d/*
 install -o root -g root -m 0644 files/php/php5-fpm_pool.d_www.conf /etc/php5/fpm/pool.d/www.conf
 
 rsync -avz /var/lib/nginx /mnt/ && rm -rf /var/lib/nginx && ln -s /mnt/nginx /var/lib/
+rsync -avz /var/lib/php5 /mnt/ && rm -rf /var/lib/php5 && ln -s /mnt/php5 /var/lib/
 
 service php5-fpm restart
 service nginx restart

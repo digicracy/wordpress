@@ -7,6 +7,10 @@ options:
     type: string
     default: ""
     description: Amazon Secret Key for S3
+  s3-bucket:
+    type: string
+    default: ""
+    description: Amazon S3 Bucket
   flush-opcode-cache:
     type: boolean
     default: False
