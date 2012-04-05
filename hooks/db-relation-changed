@@ -60,7 +60,7 @@ if [ -f /etc/default/s3cmd ] ; then
 	if [ $CUR_TABLE_COUNT -eq 0 ]; then
 		juju-log "Get the last database dump"
 		mkdir -p /mnt/restore/
-		LATEST=`s3cmd -c /etc/default/s3cmd ls s3://omgubuntu.co.uk/backups/ | tail -n 1 | awk '{ print $4 }'`
+		LATEST=`s3cmd -c /etc/default/s3cmd ls s3://$S3_BUCKET/backups/ | tail -n 1 | awk '{ print $4 }'`
 		juju-log "$LATEST dump"
 		s3cmd -c /etc/default/s3cmd get $LATEST /mnt/restore/
 
