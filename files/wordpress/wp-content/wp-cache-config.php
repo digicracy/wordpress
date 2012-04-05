@@ -30,7 +30,7 @@ $cache_max_time = 3600; //in seconds
 //$use_flock = true; // Set it true or false if you know what to use
 $cache_path = WP_CONTENT_DIR . '/cache/';
 $file_prefix = 'wp-cache-';
-$ossdlcdn = 0;
+$ossdlcdn = 1; //Added by WP-Cache Manager
 
 // Array of files that have 'wp-' but should still be cached 
 $cache_acceptable_files = array( 'wp-comments-popup.php', 'wp-links-opml.php', 'wp-locations.php' );
@@ -92,5 +92,5 @@ $wp_cache_not_logged_in = 0; //Added by WP-Cache Manager
 $wp_cache_clear_on_post_edit = 0; //Added by WP-Cache Manager
 $wp_cache_hello_world = 0; //Added by WP-Cache Manager
 $wp_cache_mobile_enabled = 0; //Added by WP-Cache Manager
-$wp_cache_cron_check = 0;
+$wp_cache_cron_check = 1; //Added by WP-Cache Manager
 ?>
