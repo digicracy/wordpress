@@ -4,6 +4,7 @@ DB_HOST=""
 DB_USER=""
 DB_PASS=""
 DB_NAME=""
+S3_BUCKET=""
 NOW=`date "+%Y%m%d-%H%M"`
 
 if [ ! -z "$DB_HOST" ];then
@@ -12,6 +13,6 @@ if [ ! -z "$DB_HOST" ];then
 	tar -czf mysql.$NOW.sql.tar.gz mysql.$NOW.sql
 
 	if [ -f "/etc/default/s3cmd" ]; then
-		s3cmd -c /etc/default/s3cmd put mysql.$NOW.sql.tar.gz s3://omgubuntu.co.uk/backups/
+		s3cmd -c /etc/default/s3cmd put mysql.$NOW.sql.tar.gz s3://$S3_BUCKET/backups/
 	fi
 fi

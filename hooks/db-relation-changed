@@ -25,6 +25,8 @@ if [ -z "$database" ] ; then
     exit 0
 fi
 
+S3_BUCKET=`config-get s3-bucket`
+
 secret_key=`pwgen 10 1`
 source "/usr/share/charm-helper/sh/net.sh"
 
@@ -127,6 +129,7 @@ sed -i -e "s@DB_HOST=\".*\"@DB_HOST=\"$host\"@" \
     -e "s@DB_USER=\".*\"@DB_USER=\"$user\"@" \
     -e "s@DB_PASS=\".*\"@DB_PASS=\"$password\"@" \
     -e "s@DB_NAME=\".*\"@DB_NAME=\"$database\"@" \
+    -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$s3_bucket\"@" \
     /etc/cron.daily/omg-backup
 
 # Restart apache
