@@ -75,6 +75,7 @@ if [ -f /etc/default/s3cmd ] ; then
 	fi
 else
     juju-log "No AWS Credentials, not restoring database from S3"
+    exit 2
 fi
 
 juju-log "Dropping OMG specific files: Themes, plugins, etc in to position"
@@ -129,7 +130,7 @@ sed -i -e "s@DB_HOST=\".*\"@DB_HOST=\"$host\"@" \
     -e "s@DB_USER=\".*\"@DB_USER=\"$user\"@" \
     -e "s@DB_PASS=\".*\"@DB_PASS=\"$password\"@" \
     -e "s@DB_NAME=\".*\"@DB_NAME=\"$database\"@" \
-    -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$s3_bucket\"@" \
+    -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$S3_BUCKET\"@" \
     /etc/cron.daily/omg-backup
 
 # Restart apache
