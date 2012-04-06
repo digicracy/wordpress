@@ -3,7 +3,7 @@
 add-apt-repository ppa:charmers/charm-helpers
 
 apt-get update && apt-get -y upgrade
-apt-get -y install mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync
+apt-get -y install memcached php5-memcache mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync
 
 rm -f /etc/cron.d/php5
 mv files/php/php_conf.d_apc.ini /etc/php5/conf.d/
@@ -16,6 +16,12 @@ rm -f /etc/nginx/conf.d/*
 
 rm -f /etc/nginx/nginx.conf
 install -o root -g root -m 0644 files/nginx/etc_nginx_nginx.conf /etc/nginx/nginx.conf
+
+rm -f /etc/php5/fpm/php.ini
+install -o root -g root -m 0644 files/php/php.ini /etc/php5/fpm/php.ini
+
+rm -f /etc/memcached.conf
+install -o root -g root -m 0644 files/php/memcached.conf /etc/memcached.conf
 
 rm -f /etc/nginx/sites-available/omgubuntu.co.uk
 install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_omgubuntu.co.uk /etc/nginx/sites-available/omgubuntu.co.uk
@@ -35,6 +41,7 @@ install -o root -g root -m 0644 files/php/php5-fpm_pool.d_www.conf /etc/php5/fpm
 rsync -avz /var/lib/nginx /mnt/ && rm -rf /var/lib/nginx && ln -s /mnt/nginx /var/lib/
 rsync -avz /var/lib/php5 /mnt/ && rm -rf /var/lib/php5 && ln -s /mnt/php5 /var/lib/
 
+service memcachd restart
 service php5-fpm restart
 service nginx restart
 

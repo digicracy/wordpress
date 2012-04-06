@@ -1,4 +1,5 @@
 #!/bin/bash
 
+service memcached restart
 service php5-fpm restart
 service nginx restart

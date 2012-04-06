@@ -1,3 +1,4 @@
 #!/bin/bash
 
+service memcached stop
 /etc/cron.daily/omg-backup
