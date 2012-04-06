@@ -4,7 +4,7 @@ Plugin Name: P3 (Plugin Performance Profiler)
 Plugin URI: http://support.godaddy.com/godaddy/wordpress-p3-plugin/
 Description: See which plugins are slowing down your site.  Create a profile of your WordPress site's plugins' performance by measuring their impact on your site's load time.
 Author: GoDaddy.com
-Version: 1.1.3
+Version: 1.2.0
 Author URI: http://www.godaddy.com/
 */
 
@@ -18,9 +18,6 @@ if ( !defined( 'ABSPATH') )
 
 // Shortcut for knowing our path
 define( 'P3_PATH',  realpath( dirname( __FILE__ ) ) );
-
-// Flag file for enabling profile mode
-define( 'P3_FLAG_FILE', P3_PATH . DIRECTORY_SEPARATOR . '.profiling_enabled' );
 
 // Directory for profiles
 $uploads_dir = wp_upload_dir();
@@ -49,6 +46,9 @@ if ( is_admin() ) {
 	
 	// Upgrade routine
 	add_action( 'admin_init', array( $p3_profiler_plugin, 'upgrade' ) );
+
+	// Figure out the action
+	add_action( 'admin_init', array( $p3_profiler_plugin, 'action_init' ) );
 
 	// Ajax actions
 	add_action( 'wp_ajax_p3_start_scan', array( $p3_profiler_plugin, 'ajax_start_scan' ) );
@@ -117,7 +117,7 @@ class P3_Profiler_Plugin {
 	 */
 	public function remove_admin_bar() {
 		if ( !is_admin() && is_user_logged_in() ) {
-			remove_action( 'wp_footer', 'wp_admin_bar_render', 1000 );
+			remove_action( 'init', '_wp_admin_bar_init' );
 			if ( true === force_ssl_admin() ) {
 				add_filter( 'site_url', array( $this, '_fix_url' ) );
 				add_filter( 'admin_url', array( $this, '_fix_url' ) );
@@ -212,15 +212,11 @@ class P3_Profiler_Plugin {
 		wp_enqueue_style( 'p3_qtip_css', plugins_url() . '/p3-profiler/css/jquery.qtip.min.css' );
 		wp_enqueue_style( 'p3_css', plugins_url() . '/p3-profiler/css/p3.css' );
 	}
-	
+
 	/**
-	 * Load the necessary resources
-	 * @uses wp_enqueue_script
-	 * @uses jquery, jquery-ui, jquery.corners
-	 * @uses flot, flot.pie
-	 * @return void
+	 * Determine the action from the query string that guides the exection path
 	 */
-	public function early_init() {
+	public function action_init() {
 
 		// Only for our page
 		if ( isset( $_REQUEST['page'] ) && basename( __FILE__ ) == $_REQUEST['page'] ) {
@@ -242,13 +238,36 @@ class P3_Profiler_Plugin {
 				}
 				$this->scan = P3_PROFILES_PATH . "/{$this->scan}";
 			}
+			
+			// Download the debug logs before output is sent
+			if ( 'download-debug-log' == $this->action ) {
+				$this->download_debug_log();
+			} elseif ( 'clear-debug-log' == $this->action ) {
+				$this->clear_debug_log();
+			}
+		}
+	}
+	
+	/**
+	 * Load the necessary resources
+	 * @uses wp_enqueue_script
+	 * @uses jquery, jquery-ui, jquery.corners
+	 * @uses flot, flot.pie
+	 * @return void
+	 */
+	public function early_init() {
+
+		// Only for our page
+		if ( isset( $_REQUEST['page'] ) && basename( __FILE__ ) == $_REQUEST['page'] ) {
 
 			// If there's a scan, create a viewer object
 			if ( !empty( $this->scan ) ) {
 				try {
 					$this->profile = new P3_Profile_Reader( $this->scan );
 				} catch ( P3_Profile_No_Data_Exception $e ) {
-					echo '<div class="error"><p>' . $e->getMessage() . '</p></div>';
+					echo '<div class="error"><p>No visits recorded during this profiling session.  Check the <a href="' .
+						  add_query_arg( array( 'p3_action' => 'help', 'current_scan' => null ) ) . '#q-circumvent-cache"' .
+						  '>help</a> page for more information</p></div>';
 					$this->scan = null;
 					$this->profile = null;
 					$this->action = 'list-scans';
@@ -289,9 +308,6 @@ class P3_Profiler_Plugin {
 			case 'start-scan' :
 				$this->start_scan();
 				break;
-			case 'fix-flag-file' :
-				$this->fix_flag_file();
-				break;
 			case 'help' :
 				$this->show_help();
 				break;
@@ -301,62 +317,11 @@ class P3_Profiler_Plugin {
 	}
 	
 	/**
-	 * Explain why P3 is asking for FTP credentials
+	 * Order terms randomly
 	 * @return string
 	 */
-	public function fix_flag_file_help() {
-		?>
-		<div class="wrap">
-		<strong>Why am I being asked for this information?</strong>
-		<blockquote>
-			P3 cannot write to this file:<br />
-			<code><?php echo P3_FLAG_FILE; ?></code>
-			<br />
-			P3 needs to write to this file to toggle profiling for your site.
-			If you want to fix this manually, please ensure the file is readable
-			and writable by the web server.
-		</blockquote>
-		<div class="updated">
-			<p>P3 does <strong>not</strong> store or re-transmit this information.</p>
-		</div>
-		</div>
-		<?php
-	}	
-
-	/**
-	 * Write .profiling_enabled file, uses request_filesystem_credentials, if
-	 * necessary, to create the file and make it writable
-	 * @return void
-	 */
-	public function fix_flag_file() {
-
-		// Don't force a specific file system method
-		$method = '';
-		
-		// Define any extra pass-thru fields (none)
-		$form_fields = array();
-		
-		// Define the URL to post back to (this one)
-		$url = wp_nonce_url( add_query_arg( array( 'p3_action' => 'fix-flag-file' ) ), 'p3-fix-flag-file' );
-
-		// Ask for credentials, if necessary
-		if ( false === ( $creds = request_filesystem_credentials( $url, $method, false, false, $form_fields ) ) ) {
-			$this->fix_flag_file_help();
-			return true; 
-		} elseif ( ! WP_Filesystem($creds) ) {
-			// The credentials are bad, ask again
-			request_filesystem_credentials( $url, $method, true, false, $form_fields );
-			$this->fix_flag_file_help();
-			return true;
-		} else {
-			// Once we get here, we should have credentials, do the file system operations
-			global $wp_filesystem;
-			if ( $wp_filesystem->put_contents( $wp_filesystem->wp_plugins_dir() . '/p3-profiler/.profiling_enabled' , '[]', FS_CHMOD_FILE | 0222) ) {
-				include_once P3_PATH . '/templates/template.php';
-			} else {
-				wp_die( 'Error saving file!' );
-			}
-		}
+	public function get_terms_orderby() {
+		return 'rand()';
 	}
 
 	/**
@@ -368,14 +333,26 @@ class P3_Profiler_Plugin {
 		// Start off the scan with the home page
 		$pages = array( get_home_url() ); // Home page
 
-		// Get the default RSS feed
-		$pages[] = get_feed_link();
+		// Search for a word from the blog description
+		$words = array_merge( explode( ' ', get_bloginfo( 'name' ) ), explode( ' ', get_bloginfo( 'description' ) ) );
+		$pages[] = home_url( '?s=' . $words[ mt_rand( 0, count( $words ) - 1 ) ] );
 
-		// Search for 'e'
-		$pages[] = home_url( '?s=e' );
+		// Get 4 random tags
+		add_filter( 'get_terms_orderby', array( $this, 'get_terms_orderby' ) );
+		$terms = get_terms( 'post_tag', 'number=4' );
+		foreach ( (array) $terms as $term ) {
+			$pages[] = get_term_link( $term );
+		}
 
-		// Get the latest 10 posts
-		$tmp = preg_split( '/\s+/', wp_get_archives( 'type=postbypost&limit=10&echo=0' ) );
+		// Get 4 random categories
+		$cats = get_terms( 'category', 'number=4');
+		foreach ( (array) $cats as $cat ) {
+			$pages[] = get_term_link( $cat );
+		}
+		remove_filter( 'get_terms_orderby', array( $this, 'get_terms_orderby' ) );
+		
+		// Get the latest 4 posts
+		$tmp = preg_split( '/\s+/', wp_get_archives( 'type=postbypost&limit=4&echo=0' ) );
 		if ( !empty( $tmp ) ) {
 			foreach ( $tmp as $page ) {
 				if ( preg_match( "/href='([^']+)'/", $page, $matches ) ) {
@@ -413,38 +390,24 @@ class P3_Profiler_Plugin {
 		// Sanitize the file name
 		$filename = sanitize_file_name( basename( $_POST['p3_scan_name'] ) );
 
-		// Create flag file
-		if ( file_exists( P3_FLAG_FILE ) ) {
-			$json = json_decode( file_get_contents( P3_FLAG_FILE ) );
-		} else {
-			$json = array();
-		}
-		
-		// Site url
-		$site_url = parse_url( get_home_url(), PHP_URL_PATH );
-		if ( null === $site_url ) {
-			$site_url = '/';
-		}
-
 		// Add the entry ( multisite installs can run more than one concurrent profile )
-		$json[] = array(
+		$opts = array(
 			'ip'                   => stripslashes( $_POST['p3_ip'] ),
 			'disable_opcode_cache' => ( 'true' == $_POST['p3_disable_opcode_cache'] ),
-			'site_url'             => $site_url,
 			'name'                 => $filename,
 		);
 
-		$flag1 = file_put_contents( P3_FLAG_FILE, json_encode( $json ) );
-		
+		update_option( 'p3-profiler_profiling_enabled', $opts );
+
 		// Kick start the profile file
 		if ( !file_exists( P3_PROFILES_PATH . "/$filename.json" ) ) {
-			$flag2 = file_put_contents( P3_PROFILES_PATH . "/$filename.json", '' );
+			$flag = file_put_contents( P3_PROFILES_PATH . "/$filename.json", '' );
 		} else {
-			$flag2 = true;
+			$flag = true;
 		}
 
 		// Check if either operation failed
-		if ( false === $flag1 & $flag2 ) {
+		if ( false === $flag ) {
 			wp_die( 0 );
 		} else {
 			echo 1;
@@ -463,37 +426,16 @@ class P3_Profiler_Plugin {
 			wp_die( 'Invalid nonce' );
 		}
 
-		// If there's no file, return an error
-		if ( !file_exists( P3_FLAG_FILE ) ) {
-			wp_die( 0 );
-		}
-
-		// Get the file
-		$json = json_decode( file_get_contents( P3_FLAG_FILE ) );
-		
-		// Stop all sites who match the current site's URL
-		$site_url = parse_url( get_home_url(), PHP_URL_PATH );
-		if ( null === $site_url ) {
-			$site_url = '/';
-		}
-		foreach ( (array) $json as $k => $v ) {
-			if ( $site_url == $v->site_url ) {
-				unset( $json[$k] );
-			}
-		}
-
-		// Rewrite the file
-		$flag = file_put_contents( P3_FLAG_FILE, json_encode( $json ) );
-		if ( !$flag ) {
-			wp_die( 0 );
-		}
+		// Turn off scanning
+		$opts = get_option( 'p3-profiler_profiling_enabled' );
+		update_option( 'p3-profiler_profiling_enabled', false );
 
 		// Tell the user what happened
 		$this->add_notice( 'Turned off performance scanning.' );
 
 		// Return the last filename
-		if ( !empty( $v ) && is_object( $v ) && property_exists( $v, 'name' ) ) {
-			echo $v->name . '.json';
+		if ( !empty( $opts ) && is_array( $opts ) && array_key_exists( 'name', $opts ) ) {
+			echo $opts['name'] . '.json';
 			die();
 		} else {
 			wp_die( 0 );
@@ -516,7 +458,16 @@ class P3_Profiler_Plugin {
 		update_option( 'p3-profiler_cache_buster', 'true' == $_POST['p3_cache_buster'] );
 		update_option( 'p3-profiler_use_current_ip', 'true' == $_POST['p3_use_current_ip'] );
 		update_option( 'p3-profiler_ip_address', $_POST['p3_ip_address'] );
-	
+		update_option( 'p3-profiler_debug', 'true' == $_POST['p3_debug'] );
+
+		// Clear the debug log if it's full
+		if ( 'true' === $_POST['p3_debug'] ) {
+			$log = get_option( 'p3-profiler_debug_log' );
+			if ( is_array( $log ) && count( $log ) >= 100  ) {
+				update_option( 'p3-profiler_debug_log', array() );
+			}
+		}
+
 		die( '1' );
 	}
 	
@@ -539,9 +490,7 @@ class P3_Profiler_Plugin {
 		// Check fields
 		$to      = sanitize_email( $_POST['p3_to'] );
 		$from    = sanitize_email( $_POST['p3_from'] );
-		$subject = filter_var(
-			$_POST['p3_subject'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-		);
+		$subject = trim( $_POST['p3_subject'] );
 		$message = strip_tags( $_POST['p3_message'] );
 		$results = strip_tags( $_POST['p3_results'] );
 		
@@ -588,6 +537,63 @@ class P3_Profiler_Plugin {
 	 */
 	public function show_help() {
 		include_once P3_PATH . '/templates/template.php';
+	}
+
+	
+	/**************************************************************/
+	/** DEBUG LOG FUNCTIONS                                      **/
+	/**************************************************************/
+	
+	/**
+	 * Clear the debug log
+	 */
+	public function clear_debug_log() {
+		if ( !check_admin_referer( 'p3-clear-debug-log' ) ) {
+			wp_die( 'Invalid access' );
+		}
+		update_option( 'p3-profiler_debug_log', array() );
+		wp_redirect( add_query_arg( array( 'p3_action' => 'help' ) ) );
+	}
+	
+	/**
+	 * Download the debug log
+	 */
+	public function download_debug_log() {
+		if ( !check_admin_referer( 'p3-download-debug-log' ) ) {
+			wp_die( 'Invalid access' );
+		}
+		$log = get_option( 'p3-profiler_debug_log' );
+		if ( empty( $log ) ) {
+			$log = array();
+		}
+		header('Pragma: public');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0'); 
+		header('Content-Type: application/force-download');
+		header('Content-Type: application/octet-stream');
+		header('Content-Type: application/download');
+		header('Content-Disposition: attachment; filename="p3debug.csv";');
+		header('Content-Transfer-Encoding: binary');
+		
+		// File header
+		echo '"Profiling Enabled","Recording IP","Scan Name","Recording","Disable Optimizers","URL","Visitor IP","Time","PID"' . "\n";
+
+		foreach ( (array) $log as $entry ) {
+			printf('"%s","%s","%s","%s","%s","%s","%s","%s","%d"' . "\n",
+				$entry['profiling_enabled'] ? 'true' : 'false',
+				$entry['recording_ip'],
+				$entry['scan_name'],
+				$entry['recording'] ? 'true' : 'false',
+				$entry['disable_optimizers'] ? 'true' : 'false',
+				$entry['url'],
+				$entry['visitor_ip'],
+				date( 'Y-m-d H:i:s', $entry['time'] ),
+				$entry['pid']
+			);
+		}
+
+		// Done
+		die();
 	}
 
 
@@ -679,12 +685,6 @@ class P3_Profiler_Plugin {
 	 * @return voide
 	 */
 	public function show_notices() {
-
-		// Skip notices if we're fixing the flag file
-		if ( 'fix-flag-file' == $this->action ) {
-			return true;
-		}
-		
 		$notices = get_transient( 'p3_notices' );
 		if ( !empty( $notices ) ) {
 			$notices = array_unique( $notices );
@@ -695,16 +695,6 @@ class P3_Profiler_Plugin {
 		set_transient( 'p3_notices', array() );
 		if ( false !== $this->scan_enabled() ) {
 			echo '<div class="updated"><p>Performance scanning is enabled.</p></div>';
-		}
-		
-		// Check that we can write .profiling_enabled
-		if ( isset( $_REQUEST['page'] ) && basename( __FILE__ ) == $_REQUEST['page'] && 'fix-flag-file' != $this->action ) {
-			if ( !file_exists( P3_FLAG_FILE ) || !is_writable( P3_FLAG_FILE ) ) {
-				@touch( P3_FLAG_FILE );
-				if ( !file_exists( P3_FLAG_FILE ) || !is_writable( P3_FLAG_FILE ) ) {
-					echo '<div class="error"><p>Cannot set profile flag file <input type="button" onclick="location.href=\'' . add_query_arg( array( 'p3_action' => 'fix-flag-file' ) ) . '\';" class="button" value="click here to fix" /></p></div>';
-				}
-			}
 		}
 	}
 
@@ -723,22 +713,8 @@ class P3_Profiler_Plugin {
 			die( '<strong>P3</strong> requires WordPress 3.3 or later' );
 		}
 
-
-		$sapi = strtolower( php_sapi_name() );
-
-		// .htaccess for mod_php
-		if ( 'apache2handler' == $sapi ) {
-			insert_with_markers(
-				ABSPATH . '/.htaccess',
-				'p3-profiler',
-				array( 'php_value auto_prepend_file "' . P3_PATH . DIRECTORY_SEPARATOR . 'start-profile.php"' )
-			);
-		}
-
-		// Always try to create the mu-plugin loader in case either of the above methods fail
-
 		// mu-plugins doesn't exist	
-		if ( !file_exists( WPMU_PLUGIN_DIR ) && is_writable( WPMU_PLUGIN_DIR . '/../' ) ) {
+		if ( !file_exists( WPMU_PLUGIN_DIR ) && is_writable( dirname( WPMU_PLUGIN_DIR ) ) ) {
 			wp_mkdir_p( WPMU_PLUGIN_DIR );
 		}
 		if ( file_exists( WPMU_PLUGIN_DIR ) && is_writable( WPMU_PLUGIN_DIR ) ) {
@@ -788,12 +764,12 @@ class P3_Profiler_Plugin {
 	 * @return void
 	 */
 	public function deactivate() {
+		global $p3_profiler;
 
-		// Remove any .htaccess modifications
-		$file = ABSPATH . '/.htaccess';
-		if ( file_exists( $file ) && array() !== extract_from_markers( $file, 'p3-profiler' ) ) {
-			insert_with_markers( $file, 'p3-profiler', array( '# removed during uninstall' ) );
-		}
+		// Unhook the profiler
+		update_option( 'p3-profiler_debug', false );
+		update_option( 'p3-profiler_debug_log', array() );
+		remove_action( 'shutdown', array( $p3_profiler, 'shutdown_handler' ) );
 
 		// Remove mu-plugin
 		if ( file_exists( WPMU_PLUGIN_DIR . '/p3-profiler.php' ) ) {
@@ -811,6 +787,13 @@ class P3_Profiler_Plugin {
 	 * @return void
 	 */
 	public static function uninstall() {
+		global $p3_profiler;
+
+		// Unhook the profiler
+		update_option( 'p3-profiler_debug', false );
+		update_option( 'p3-profiler_debug_log', array() );
+		remove_action( 'shutdown', array( $p3_profiler, 'shutdown_handler' ) );
+
 		// This is a static function so it needs an instance
 		// Since I'm myself, I can call my own private methods
 		$class = __CLASS__;
@@ -831,6 +814,9 @@ class P3_Profiler_Plugin {
 				delete_option( 'p3-profiler_ip_address' );
 				delete_option( 'p3-profiler_version' );
 				delete_option( 'p3-profiler_cache_buster' );
+				delete_option( 'p3-profiler_profiling_enabled' );
+				delete_option( 'p3-profiler_debug' );
+				delete_option( 'p3-profiler_debug_log' );
 			}
 			restore_current_blog();
 		} else {
@@ -842,6 +828,9 @@ class P3_Profiler_Plugin {
 			delete_option( 'p3-profiler_ip_address' );
 			delete_option( 'p3-profiler_version' );
 			delete_option( 'p3-profiler_cache_buster' );
+			delete_option( 'p3-profiler_profiling_enabled' );
+			delete_option( 'p3-profiler_debug' );
+			delete_option( 'p3-profiler_debug_log' );
 		}
 	}
 
@@ -850,18 +839,9 @@ class P3_Profiler_Plugin {
 	 * @return array|false
 	 */
 	public function scan_enabled() {
-		if ( !file_exists( P3_FLAG_FILE ) ) {
-			return false;
-		}
-		$site_url = parse_url( get_home_url(), PHP_URL_PATH );
-		if ( null === $site_url ) {
-			$site_url = '/';
-		}
-		$json = json_decode( file_get_contents( P3_FLAG_FILE ), true );
-		foreach ( (array) $json as $v ) {
-			if ( $site_url == $v['site_url'] ) {
-				return $v;
-			}
+		$opts = get_option( 'p3-profiler_profiling_enabled' );
+		if ( !empty( $opts ) ) {
+			return $opts;			
 		}
 		return false;
 	}
@@ -893,6 +873,9 @@ class P3_Profiler_Plugin {
 		delete_option( 'p3-profiler_ip_address' );
 		delete_option( 'p3-profiler_version' );
 		delete_option( 'p3-profiler_cache_buster' );
+		delete_option( 'p3-profiler_profiling_enabled' );
+		delete_option( 'p3-profiler_debug' );
+		delete_option( 'p3-profiler_debug_log' );
 	}
 
 	/**
@@ -902,11 +885,16 @@ class P3_Profiler_Plugin {
 	 */
 	public function upgrade() {
 
+		// Only for our page
+		if ( !isset( $_REQUEST['page'] ) || basename( __FILE__ ) != $_REQUEST['page'] ) {
+			return;
+		}
+		
 		// Get the current version
 		$version = get_option( 'p3-profiler_version' );
-		
+
 		// Upgrading from < 1.1.0
-		if ( empty( $version ) || version_compare( $version, '1.1.0') < 0 ) {
+		if ( empty( $version ) || version_compare( $version, '1.1.0' ) < 0 ) {
 			update_option( 'p3-profiler_disable_opcode_cache', true );
 			update_option( 'p3-profiler_use_current_ip', true );
 			update_option( 'p3-profiler_ip_address', '' );
@@ -914,9 +902,30 @@ class P3_Profiler_Plugin {
 		}
 		
 		// Upgrading from < 1.1.2
-		elseif ( version_compare( $version, '1.1.2') < 0 ) {
+		if ( empty( $version) || version_compare( $version, '1.1.2' ) < 0 ) {
 			update_option( 'p3-profiler_cache_buster', true );
 			update_option( 'p3-profiler_version', '1.1.2' );
+		}
+
+		// Upgrading from < 1.2.0
+		if ( empty( $version) || version_compare( $version, '1.2.0' ) < 0 ) {
+
+			// Set profiling option
+			update_option( 'p3-profiler_profiling_enabled', false );
+			update_option( 'p3-profiler_version', '1.2.0' );
+			update_option( 'p3-profiler_debug', false );
+			update_option( 'p3-profiler_debug_log', array() );
+
+			// Remove any .htaccess modifications
+			$file = ABSPATH . '/.htaccess';
+			if ( file_exists( $file ) && array() !== extract_from_markers( $file, 'p3-profiler' ) ) {
+				insert_with_markers( $file, 'p3-profiler', array( '# removed during 1.2.0 upgrade' ) );
+			}
+
+			// Remove .profiling_enabled if it's still present
+			if ( file_exists( P3_PATH . '/.profiling_enabled' ) ) {
+				@unlink( P3_PATH . '/.profiling_enabled' );
+			}
 		}
 
 		// Ensure the profiles folder is there

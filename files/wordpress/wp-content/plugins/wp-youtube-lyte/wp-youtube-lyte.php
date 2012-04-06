@@ -4,13 +4,13 @@ Plugin Name: WP YouTube Lyte
 Plugin URI: http://blog.futtta.be/wp-youtube-lyte/
 Description: Lite and accessible YouTube audio and video embedding.
 Author: Frank Goossens (futtta)
-Version: 1.1.0
+Version: 1.1.2
 Author URI: http://blog.futtta.be/
 Text Domain: wp-youtube-lyte
 Domain Path: /languages
 */
 
-$wyl_version="1.1.0";
+$wyl_version="1.1.2";
 
 $plugin_dir = basename(dirname(__FILE__)).'/languages';
 load_plugin_textdomain( 'wp-youtube-lyte', null, $plugin_dir );
@@ -140,7 +140,7 @@ function lyte_parse($the_content) {
 				$noscript="<noscript><a href=\"".$scheme."://youtu.be/".$vid."\"><img src=\"".$scheme."://img.youtube.com/vi/".$vid."/0.jpg\" alt=\"\" width=\"".$lyteSettings[2]."\" height=\"".$NSimgHeight."\" />".$noscript_post."</a> ".$NSbanner."</noscript>";
 			}
 
-			$lytetemplate = "<div class=\"lyte".$audioClass.$hidefClass.$plClass.$qsaClass."\" id=\"WYL_".$vid."\" style=\"width:".$lyteSettings[2]."px;height:".$divHeight."px;\">".$noscript."</div>".$lytelinks_txt;
+			$lytetemplate = "<div class=\"lyMe".$audioClass.$hidefClass.$plClass.$qsaClass."\" id=\"WYL_".$vid."\" style=\"width:".$lyteSettings[2]."px;height:".$divHeight."px;\">".$noscript."</div>".$lytelinks_txt;
 			$the_content = preg_replace("/(<p>)?http(v|a):\/\/([a-zA-Z0-9\-\_]+\.|)(youtube|youtu)(\.com|\.be)\/(((watch(\?v\=|\/v\/)|)([a-zA-Z0-9\-\_]{11}))|(playlist\?list\=PL([a-zA-Z0-9\-\_]{16})))([^\s<]*)(<\/p>)?/", $lytetemplate, $the_content, 1);
                 }
 		lyte_initer();
@@ -157,9 +157,8 @@ function lyte_initer() {
 
 function lyte_init() {
 	global $lyteSettings;
-	echo "<link rel=\"stylesheet\" href=\"".$lyteSettings['path']."lyte.css?wylver=".$lyteSettings['version']."\" type=\"text/css\" />";
-	echo "<script type=\"text/javascript\">var bU='".$lyteSettings['path']."';</script>";
-	echo "<script type=\"text/javascript\" src=\"".$lyteSettings['path']."lyte-min.js?wylver=".$lyteSettings['version']."\"></script>";
+	echo "<script type=\"text/javascript\">var bU='".$lyteSettings['path']."';style = document.createElement('style');style.type = 'text/css';rules = document.createTextNode('.lyte img {border:0px !important;padding:0px;spacing:0px;margin:0px;display:inline;background-color:transparent;} .lL {margin:0px 0px 10px 0px;} .lyte {margin:5px 0px;} .lP {background-color:#fff;} .pL {cursor:pointer;text-align:center;overflow:hidden;position:relative;margin:0px;} .tC {left:0;top:0;position:absolute;width:100%;background-color:rgba(0,0,0,0.6);} .tT {padding:5px 10px;font-size:16px;color:#ffffff;font-family:sans-serif;text-align:left;} .ctrl {position:absolute;left:0px;bottom:0px;}');if(style.styleSheet) { style.styleSheet.cssText = rules.nodeValue;} else {style.appendChild(rules);}document.getElementsByTagName('head')[0].appendChild(style);</script>";
+	echo "<script type=\"text/javascript\" async=true src=\"".$lyteSettings['path']."lyte-min.js?wylver=".$lyteSettings['version']."\"></script>";
 }
 
 if ( is_admin() ) {

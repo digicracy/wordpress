@@ -88,10 +88,10 @@ class P3_Profiler {
 	private $_P3_PATH = ''; // Cannot rely on P3_PATH, may be instantiated before the plugin
 
 	/**
-	 * Path to the ".profiling_enabled" flag file
-	 * @var string
+	 * Debug log entry
+	 * @var array
 	 */
-	private $_P3_FLAG_FILE = '';
+	private $_debug_entry = array();
 	
 	/**
 	 * Last stack should be marked as plugin time
@@ -121,30 +121,53 @@ class P3_Profiler {
 
 		// Set up paths
 		$this->_P3_PATH      = realpath( dirname( __FILE__ ) );
-		$this->_P3_FLAG_FILE = $this->_P3_PATH . DIRECTORY_SEPARATOR . '.profiling_enabled';
+
+		// Debug mode
+		$this->_debug_entry = array(
+			'profiling_enabled'  => false,
+			'recording_ip'       => '',
+			'scan_name'          => '',
+			'recording'          => false,
+			'disable_optimizers' => false,
+			'url'                => $this->_get_url(),
+			'visitor_ip'         => $this->get_ip(),
+			'time'               => time(),
+			'pid'                => getmypid()
+		);
 
 		// Check to see if we should profile
-		$p3_json = ( file_exists( $this->_P3_FLAG_FILE ) ? json_decode( file_get_contents( $this->_P3_FLAG_FILE ) ) : null );
-		if ( empty( $p3_json ) ) {
-			return $this;
-		}
-		$found = false;
-		foreach ( (array) $p3_json as $v ) {
-			if ( 0 === strpos( $_SERVER['REQUEST_URI'], $v->site_url ) && preg_match( '/' . $v->ip . '/', $this->get_ip() ) ) {
-				$found = true;
-				break;
+		$opts = array();
+		if ( function_exists( 'get_option') ) {
+			$opts = get_option('p3-profiler_profiling_enabled');
+			if ( !empty( $opts ) ) {
+				if ( isset( $this->_debug_entry ) ) {
+					$this->_debug_entry['profiling_enabled']  = true;
+					$this->_debug_entry['scan_name']          = $opts['name'];
+					$this->_debug_entry['recording_ip']       = $opts['ip'];
+					$this->_debug_entry['disable_optimizers'] = $opts['disable_opcode_cache'];
+				}
 			}
 		}
-		if ( !$found ) {
-			return $this;
+		
+		// Add a global flag to let everyone know we're profiling
+		if ( !empty( $opts ) && preg_match( '/' . $opts['ip'] . '/', $this->get_ip() ) ) {
+			define( 'WPP_PROFILING_STARTED', true );
 		}
 
+		// Save the debug info
+		$this->_debug_entry['recording'] = defined( 'WPP_PROFILING_STARTED' );
+
+		// Check the profiling flag
+		if ( !defined( 'WPP_PROFILING_STARTED' ) ) {
+			return $this;
+		}
+		
 		// Kludge memory limit / time limit
 		@ini_set( 'memory_limit', '128M' );
 		@set_time_limit( 90 );
 		
 		// Set the profile file
-		$this->_profile_filename = $v->name . '.json';
+		$this->_profile_filename = $opts['name'] . '.json';
 
 		// Start timing
 		$this->_start_time      = microtime( true );
@@ -159,35 +182,42 @@ class P3_Profiler {
 		$this->_last_call_category = self::CATEGORY_CORE;
 		$this->_last_stack         = array();
 
-		// Add a global flag to let everyone know we're profiling
-		define( 'WPP_PROFILING_STARTED', true );
-
 		// Add some startup information
 		$this->_profile = array(
 			'url'   => $this->_get_url(),
-			'ip'    => ( array_key_exists( 'HTTP_X_FORWARDED_FOR', $_SERVER ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] ),
+			'ip'    => $this->get_ip(),
 			'pid'   => getmypid(),
 			'date'  => @date( 'c' ),
 			'stack' => array()
 		);
 
-		// Clear any opcode caches, the optimization / caching from these can
-		// hide calls from the tick handler and backtraces
-		if ( $v->disable_opcode_cache ) {
-			if ( extension_loaded( 'xcache' ) && function_exists( 'xcache_clear_cache' ) && !ini_get( 'xcache.admin.enable_auth' ) ) {
-				for ( $i = 0 ; $i < xcache_count( XC_TYPE_PHP ); $i++ ) {
-					xcache_clear_cache( XC_TYPE_PHP, 0 );
-				}
-			} elseif ( extension_loaded( 'apc' ) && function_exists( 'apc_clear_cache' ) ) {
+		// Disable opcode optimizers.  These "optimize" calls out of the stack
+		// and hide calls from the tick handler and backtraces
+		if ( $opts['disable_opcode_cache'] ) {
+			if ( extension_loaded( 'xcache' ) ) {
+				@ini_set( 'xcache.optimizer', false ); // Will be implemented in 2.0, here for future proofing
+				// XCache seems to do some optimizing, anyway.  The recorded stack size is smaller with xcache.cacher enabled than without.
+			} elseif ( extension_loaded( 'apc' ) ) {
+				@ini_set( 'apc.optimization', 0 ); // Removed in APC 3.0.13 (2007-02-24)
 				apc_clear_cache();
-			} elseif ( extension_loaded( 'eaccelerator' ) && function_exists( 'eaccelerator_clean' ) ) {
-				@eaccelerator_clean();
+			} elseif ( extension_loaded( 'eaccelerator' ) ) {
+				@ini_set( 'eaccelerator.optimizer', 0 );
+				if ( function_exists( 'eaccelerator_optimizer' ) ) {
+					@eaccelerator_optimizer( false );
+				}
+				// If you're reading this, try setting eaccelerator.optimizer = 0 in a .user.ini or .htaccess file
+			} elseif (extension_loaded( 'Zend Optimizer+' ) ) {
+				@ini_set('zend_optimizerplus.optimization_level', 0);
 			}
+			// Tested with wincache
+			// Tested with ioncube
+			// Tested with zend guard loader
 		}
 
 		// Monitor all function-calls
 		declare( ticks = 1 );
 		register_tick_function( array( $this, 'tick_handler' ) );
+		add_action( 'shutdown', array( $this, 'shutdown_handler' ) );
 	}
 
 	/**
@@ -196,44 +226,18 @@ class P3_Profiler {
 	 * @return void
 	 */
 	public function tick_handler() {
-		static $theme_files_cache = array();      // Cache for theme files
-		static $actions_hooked    = false;
-		static $themes_folder     = 'themes';
-		static $content_folder    = 'wp-content';    // Guess, if it's not defined
-		static $folder_flag       = false;
-		static $in_wp             = false;
-		
-		// See if we're in WP
-		$in_wp = ($in_wp || defined( 'WP_USE_THEMES' ) || defined( 'DOING_CRON' ) || defined( 'WP_ADMIN' ));
-		
-		// Set the content folder
-		if ( !$folder_flag && defined( 'WP_CONTENT_DIR' ) ) {
+		static $theme_files_cache = array();         // Cache for theme files
+		static $content_folder = '';
+		if ( empty( $content_folder ) ) {
 			$content_folder = basename( WP_CONTENT_DIR );
-			$folder_flag    = true;
 		}
+		$themes_folder = 'themes';
 
 		// Start timing time spent in the profiler 
 		$start = microtime( true );
 
 		// Calculate the last call time
 		$this->_last_call_time = ( $start - $this->_last_call_start );
-
-		// Don't profile in non-WP scripts
-		if ( !$in_wp && !$this->_is_a_plugin_file( $_SERVER['SCRIPT_FILENAME'] ) ) {
-			$tmp = microtime( true );
-			$this->_runtime        += ( $tmp - $start );
-			$this->_last_call_start = $tmp;
-			return;
-		}
-
-		// Hook actions
-		if ( !$actions_hooked && function_exists( 'add_action' ) ) {
-			// Hook the shutdown action to save the profile when we're done
-			add_action( 'shutdown', array( $this, 'shutdown_handler' ) );
-
-			// Don't re-hook again
-			$actions_hooked = true;
-		}
 
 		// If we had a stack in the queue, track the runtime, and write it to the log
 		// array() !== $this->_last_stack is slightly faster than !empty( $this->_last_stack )
@@ -258,10 +262,12 @@ class P3_Profiler {
 
 		// Examine the current stack, see if we should track it.  It should be
 		// related to a plugin file if we're going to track it
-		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
+		if ( version_compare( PHP_VERSION, '5.3.6' ) < 0 ) {
+			$bt = debug_backtrace( true );
+		} elseif ( version_compare( PHP_VERSION, '5.4.0' ) < 0 ) {
 			$bt = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT );
 		} else {
-			$bt = debug_backtrace( true );
+			$bt = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS | DEBUG_BACKTRACE_PROVIDE_OBJECT, 2 ); // Examine the last 2 frames
 		}
 
 		// Find our function
@@ -269,6 +275,10 @@ class P3_Profiler {
 		if ( count( $bt ) >= 2 ) {
 			$frame = $bt[1];
 		}
+		$lambda_file = @$bt[0]['file'];
+
+		// Free up memory
+		unset( $bt );
 
 		// Include/require
 		if ( in_array( strtolower( $frame['function'] ), array( 'include', 'require', 'include_once', 'require_once' ) ) ) {
@@ -300,7 +310,7 @@ class P3_Profiler {
 
 		// Lambdas / closures
 		} elseif ( '__lambda_func' == $frame['function'] || '{closure}' == $frame['function'] ) {
-			$file = preg_replace( '/\(\d+\)\s+:\s+runtime-created function/', '', $bt[0]['file'] );
+			$file = preg_replace( '/\(\d+\)\s+:\s+runtime-created function/', '', $lambda_file );
 
 		// Files, no other hints
 		} elseif ( isset( $frame['file'] ) ) {
@@ -316,8 +326,6 @@ class P3_Profiler {
 			list($file, $junk) = explode(': eval(', $str, 2);
 			$file = preg_replace('/\(\d*\)$/', '', $file);
 		}
-		
-		unset( $bt );
 
 		// Is it a plugin?
 		$plugin = $this->_is_a_plugin_file( $file );
@@ -383,7 +391,7 @@ class P3_Profiler {
 		static $folder_flag        = false;
 
 		// Set the plugins folder
-		if ( !$folder_flag && defined( 'WPMU_PLUGIN_DIR' ) ) {
+		if ( !$folder_flag ) {
 			$plugins_folder   = basename( WP_PLUGIN_DIR );
 			$muplugins_folder = basename( WPMU_PLUGIN_DIR );
 			$content_folder   = basename( WP_CONTENT_DIR );
@@ -418,7 +426,7 @@ class P3_Profiler {
 		static $folder_flag      = false;
 
 		// Set the plugins folder
-		if ( !$folder_flag && defined( 'WP_PLUGIN_DIR' ) ) {
+		if ( !$folder_flag ) {
 			$plugins_folder   = basename( WP_PLUGIN_DIR );
 			$muplugins_folder = basename( WPMU_PLUGIN_DIR );
 			$content_folder   = basename( WP_CONTENT_DIR );
@@ -476,6 +484,11 @@ class P3_Profiler {
 	 * @return void
 	 */
 	public function shutdown_handler() {
+
+		// Write debug log
+		if ( get_option( 'p3-profiler_debug' ) ) {
+			$this->_write_debug_log();
+		}
 
 		// Make sure we've actually started ( wp-cron??)
 		if ( !defined( 'WPP_PROFILING_STARTED' ) || !WPP_PROFILING_STARTED ) {
@@ -576,23 +589,7 @@ class P3_Profiler {
 		// previous profiles
 		$uploads_dir = wp_upload_dir();
 		$path        = $uploads_dir['basedir'] . DIRECTORY_SEPARATOR . 'profiles' . DIRECTORY_SEPARATOR . $this->_profile_filename;
-		$fp          = fopen( $path, 'a+' );
-		$wait        = 30; // Wait 30 iterations ( 3 seconds )
-		while ( !flock( $fp, LOCK_EX ) && $wait-- ) {
-			usleep( 100 * 1000 );
-		}
-
-		// If we've waited too long, bail, don't add this profile, there's too
-		// much traffic
-		if ( $wait <= 0 ) {
-			return;
-		}
-
-		fwrite( $fp, json_encode( $this->_profile ) . PHP_EOL );
-
-		// Release the lock and close the file
-		flock( $fp, LOCK_UN );
-		fclose( $fp );
+		file_put_contents( $path, json_encode( $this->_profile ) . PHP_EOL, FILE_APPEND );
 	}
 	
 	/**
@@ -600,6 +597,10 @@ class P3_Profiler {
 	 * @return string
 	 */
 	private function _get_url() {
+		static $url = '';
+		if ( !empty( $url ) ) {
+			return $url;
+		}
 		$protocol = 'http://';
 		if ( ( !empty( $_SERVER['HTTPS'] ) && 'on' == strtolower( $_SERVER['HTTPS'] ) ) || 443 == $_SERVER['SERVER_PORT'] ) {
 			$protocol = 'https://';
@@ -625,7 +626,8 @@ class P3_Profiler {
 				$query_string = '?' . preg_replace( '/[?&]P3_NOCACHE=[a-zA-Z0-9]+/', '', $_SERVER['QUERY_STRING'] );
 			}
 		}
-		return $protocol.$domain.$file.$path.$query_string;
+		$url = $protocol.$domain.$file.$path.$query_string;
+		return $url;
 	}
 	
 	/**
@@ -638,11 +640,35 @@ class P3_Profiler {
 			return $ip;
 		} else {
 			if ( !empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-				$ip = filter_var( $_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_SANITIZE_STRING );
+				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+			} elseif ( !empty ( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+				$ip = $_SERVER['HTTP_X_REAL_IP'];
 			} else {
-				$ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_SANITIZE_STRING );
+				$ip = $_SERVER['REMOTE_ADDR'];
 			}
 			return $ip;
 		}
+	}
+	
+	/**
+	 * Disable debug mode
+	 */
+	private function _write_debug_log() {
+
+		// Get the existing log
+		$debug_log = get_option( 'p3-profiler_debug_log' );
+		if ( empty( $debug_log) ) {
+			$debug_log = array();
+		}
+
+		// Prepend this entry
+		array_unshift( $debug_log, $this->_debug_entry );
+		if ( count( $debug_log ) >= 100 ) {
+			$debug_log = array_slice( $debug_log, 0, 100 );
+			update_option( 'p3-profiler_debug', false );
+		}
+
+		// Write the log
+		update_option( 'p3-profiler_debug_log', $debug_log );
 	}
 }
