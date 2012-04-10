@@ -63,7 +63,7 @@ function scrolly_banner_thing_get_content () {
 
 		$content .= "<a id=\"$k\" ";
 		if ( $k == "banner-0" ) $content .= "class=\"opaque\" ";
-		$content .= "href=\"$c\"><img width=\"960\" height=\"200\" src=\"{$v['image']}\" alt=\"banner\"/></a>";
+		$content .= "href=\"{$v['post']}\"><img width=\"960\" height=\"200\" src=\"{$v['image']}\" alt=\"banner\"/></a>";
 		$chooser .= "<li class=\"to-" .  substr($k,7);
 		if ( $k == "banner-0" ) $chooser .= " displaying";
 		$chooser .= "\"></li>";
