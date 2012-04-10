@@ -50,9 +50,3 @@ server {
     fastcgi_param QUERY_STRING    q=$uri&$args;
   }
 }
-
-server {
-    listen 80;
-    server_name cdn.omgubuntu.co.uk;
-    rewrite ^ $scheme://omgubuntu.co.uk$request_uri permanent;
-}
