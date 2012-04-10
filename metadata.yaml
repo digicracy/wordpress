@@ -6,6 +6,9 @@ description: |
 requires:
   db:
     interface: mysql
+  cache:
+    interface: memcache
+    optional: true
 provides:
   website:
     interface: http

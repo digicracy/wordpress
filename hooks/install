@@ -3,7 +3,7 @@
 add-apt-repository ppa:charmers/charm-helpers
 
 apt-get update && apt-get -y upgrade
-apt-get -y install mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync
+apt-get -y install php5-memcache mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync
 
 rm -f /etc/cron.d/php5
 mv files/php/php_conf.d_apc.ini /etc/php5/conf.d/
