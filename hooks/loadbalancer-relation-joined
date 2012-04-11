@@ -59,6 +59,7 @@ print units
 
 servers = """
 upstream backend {
+  ip_hash;
   server 127.0.0.1:8080;
 """
 for unit in units:
