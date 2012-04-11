@@ -10,8 +10,8 @@ fi
 
 juju-log "Looks like memcache is on $MPORT at $MHOST"
 
-sed -i  -e "s/^session.save_path = .*//" \
-		-e "s@^session.save_handler = .*@session.save_handler = memcache\nsession.save_path=\"tcp://$MHOST:$MPORT?persistent=1&weight=1&timeout=1&retry_interval=15\"@" \
+sed -i  -e "s/^session.save_path = .*$//" \
+		-e "s@^session.save_handler = .*$@session.save_handler = memcache\nsession.save_path=\"tcp://$MHOST:$MPORT?persistent=1&weight=1&timeout=1&retry_interval=15\"@" \
 		/etc/php5/fpm/php.ini
 
 service php5-fpm restart

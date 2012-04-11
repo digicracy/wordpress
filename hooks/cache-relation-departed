@@ -2,8 +2,8 @@
 
 juju-log "Goodbye Memcache, reverting to php sessions and files"
 
-sed -i  -e "s@^session.save_handler = .*@session.save_handler = files@" \
-		-e "s/^session.save_path = .*//" \
+sed -i  -e "s@^session.save_handler = .*$@session.save_handler = files@" \
+		-e "s/^session.save_path = .*$//" \
 		/etc/php5/fpm/php.ini
 
 service php5-fpm restart
