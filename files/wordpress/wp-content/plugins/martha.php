@@ -6,14 +6,15 @@ Author:         Brandon Holtsclaw
 Version:        0.5
 Author URI:     http://brandonholtsclaw.com/
 */
+$martha_home = preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['HTTP_HOST'], get_option('home'));
 
 function martha_home() {
-  $martha_home = preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['SERVER_NAME'], get_option('home'));
+  global $martha_home;
   return $martha_home;
 }
  
 function martha_replace_host($url, $path = '') {
-  return preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['SERVER_NAME'], $url);
+  return preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['HTTP_HOST'], $url);
 }
  
 add_filter('pre_option_home', 'martha_home');
