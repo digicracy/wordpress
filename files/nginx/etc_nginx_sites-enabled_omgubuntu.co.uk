@@ -25,11 +25,12 @@ server {
 
   location ~* \.(js|css|png|jpg|jpeg|gif|ico|zip|gz|tar)$
   {
+    log_not_found off;
     expires max;
   }
 
  location / {
-    try_files /var/www/omgubuntu.co.uk/wp-content/cache/supercache/$uri.html $uri/ $uri @rewrite;
+    try_files /var/www/omgubuntu.co.uk/wp-content/cache/supercache/backend/$uri.html $uri/ $uri @rewrite;
   }
 
   location ~ \.php$ {
