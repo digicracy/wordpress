@@ -99,7 +99,7 @@ server {
 
 admin = """
 upstream admin {
-  ip_hash
+  ip_hash;
   server 127.0.0.1:8080;
 """
 for unit in units:
