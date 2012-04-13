@@ -1,12 +1,15 @@
 <?php
 /*
-Plugin Name:    Martha is Hott
+Plugin Name:    Martha
 Description:    Makes Wordpress frakkin Work with Multi-Domains
 Author:         Brandon Holtsclaw
 Version:        0.5
 Author URI:     http://brandonholtsclaw.com/
 */
-$martha_home = preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['HTTP_HOST'], get_option('home'));
+
+$badwolf = str_split($_SERVER['HTTP_HOST'],":");
+
+$martha_home = preg_replace('!://[a-z0-9.-]*!', '://' . $badwolf[0], get_option('home'));
 
 function martha_home() {
   global $martha_home;
@@ -14,7 +17,7 @@ function martha_home() {
 }
  
 function martha_replace_host($url, $path = '') {
-  return preg_replace('!://[a-z0-9.-]*!', '://' . $_SERVER['HTTP_HOST'], $url);
+  return preg_replace('!://[a-z0-9.-]*!', '://' . $badwolf[0], $url);
 }
 
 function martha_clear() {
