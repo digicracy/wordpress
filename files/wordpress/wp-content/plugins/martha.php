@@ -26,7 +26,7 @@ if (!wp_next_scheduled('martha_clear_hook')) {
   wp_schedule_event(time(),'hourly','marth_clear_hook');
 }
 
-add_action( 'martha_clear_hook', 'martha_clear' ); 
+add_action('martha_clear_hook', 'martha_clear');
 add_filter('pre_option_home', 'martha_home');
 add_filter('pre_option_siteurl', 'martha_home');
 add_filter('pre_option_url', 'martha_home');
