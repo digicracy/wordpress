@@ -1,0 +1,9 @@
+# Default before peer relation is handled
+server {
+  listen 80;
+  server_name admin.omgubuntu.co.uk admin-staging.omgubuntu.co.uk;
+  location / {
+    proxy_pass http://127.0.0.1:8080;
+  }
+}
+

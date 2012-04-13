@@ -21,9 +21,9 @@ rm -f /etc/nginx/sites-available/omgubuntu.co.uk
 install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_omgubuntu.co.uk /etc/nginx/sites-available/omgubuntu.co.uk
 ln -sf ../sites-available/omgubuntu.co.uk /etc/nginx/sites-enabled/omgubuntu.co.uk
 
-rm -f /etc/nginx/sites-available/admin.omgubuntu.co.uk
-install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_admin.omgubuntu.co.uk /etc/nginx/sites-available/admin.omgubuntu.co.uk
-ln -sf ../sites-available/admin.omgubuntu.co.uk /etc/nginx/sites-enabled/admin.omgubuntu.co.uk
+rm -f /etc/nginx/sites-available/admin
+install -o root -g root -m 0644 files/nginx/etc_nginx_sites-admin /etc/nginx/sites-available/admin
+ln -sf ../sites-available/admin /etc/nginx/sites-enabled/admin
 
 rm -f /etc/nginx/sites-available/loadbalancer
 install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_loadbalancer /etc/nginx/sites-available/loadbalancer

@@ -40,7 +40,7 @@ t1 = """
 # servers will go here
 template = """
 server {
-  listen 80;
+  listen 80 default;
   location / {
     proxy_set_header Host $host;
     proxy_pass  http://backend;
@@ -84,6 +84,50 @@ with tempfile.NamedTemporaryFile(dir="/etc/nginx/sites-available/",prefix="loadb
       os.rename(conf.name, "/etc/nginx/sites-available/loadbalancer")
     except:
         os.unlink(conf.name)
+
+
+template_adm = """
+server {
+  listen 80;
+  server_name admin.omgubuntu.co.uk admin-staging.omgubuntu.co.uk;
+  location / {
+    proxy_set_header Host $host;
+    proxy_pass  http://admin;
+  }
+}
+"""
+
+admin = """
+upstream admin {
+  ip_hash
+  server 127.0.0.1:8080;
+"""
+for unit in units:
+    p = subprocess.Popen(["relation-get", "private-address", unit],
+                         stdout=subprocess.PIPE, close_fds=True)
+    paddress = p.stdout.read().strip()
+    p.wait()
+    # Add all configured units:
+    admin += ("  server %s:8080;\n" % (paddress))
+admin += '}'
+
+print admin
+
+with tempfile.NamedTemporaryFile(dir="/etc/nginx/sites-available/",prefix="admin", delete=False) as conf:
+    conf.write(t1 + admin + template_adm)
+    try:
+        os.unlink("/etc/nginx/sites-available/admin.old")
+    except:
+        pass
+    try:
+        os.rename("/etc/nginx/sites-available/admin","/etc/nginx/sites-available/admin.old")
+    except:
+        pass
+    try:
+      os.rename(conf.name, "/etc/nginx/sites-available/admin")
+    except:
+        os.unlink(conf.name)
+
 
 # Just in case haproxy wouldn't start because of empty/bad configs before, start it now
 subprocess.call(["service", "nginx", "start"])
