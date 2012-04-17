@@ -7,7 +7,7 @@ Version:        0.5
 Author URI:     http://brandonholtsclaw.com/
 */
 
-$badwolf = str_split($_SERVER['HTTP_HOST'],":");
+$badwolf = explode(':', $_SERVER['HTTP_HOST']);
 
 $martha_home = preg_replace('!://[a-z0-9.-]*!', '://' . $badwolf[0], get_option('home'));
 
