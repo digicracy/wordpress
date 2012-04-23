@@ -1,3 +1,12 @@
+fastcgi_cache_path /mnt/ramdisk/fastcgi-cache levels=1:2 keys_zone=microcache:5M max_size=1G inactive=2h;
+
+upstream phpfpm {
+  fair;
+  server 127.0.0.1:9000;
+  server unix:/var/run/php5-fpm.sock;
+  keepalive 5;
+}
+
 server {
   listen 8080 default;
   server_name www.omgubuntu.co.uk omgubuntu.co.uk _;
@@ -40,10 +49,26 @@ server {
     deny all;
   }
   
+  location ~* /(fpm.www.status|fpm.www.ping)$ {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param SCRIPT_NAME     $fastcgi_script_name;
+    fastcgi_param QUERY_STRING    $args;
+  }
+  
+  location ~* /(fpm.www-tcp.status|fpm.www-tcp.ping)$ {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass 127.0.0.1:9000;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param SCRIPT_NAME     $fastcgi_script_name;
+    fastcgi_param QUERY_STRING    $args;
+  }
+ 
   location ~ \.php$ {
     try_files $uri @rewrite;
     include /etc/nginx/fastcgi_params;
-    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_pass phpfpm;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     fastcgi_param SCRIPT_NAME     $fastcgi_script_name;
     fastcgi_param QUERY_STRING    $args;
@@ -52,7 +77,11 @@ server {
   location @rewrite {
     index index.php;
     include /etc/nginx/fastcgi_params;
-    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    fastcgi_pass phpfpm;
+    fastcgi_buffers 256 4k;
+    fastcgi_intercept_errors on;
+    fastcgi_hide_header 'X-Generator';
+    fastcgi_read_timeout 14400;
     fastcgi_param SCRIPT_FILENAME $document_root/index.php;
     fastcgi_param SCRIPT_NAME     /index.php;
     fastcgi_param QUERY_STRING    $args;

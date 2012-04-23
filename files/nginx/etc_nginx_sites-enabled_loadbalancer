@@ -1,6 +1,9 @@
 # Default before peer relation is handled
+proxy_cache_path /mnt/ramdisk/proxy-cache levels=1:2 keys_zone=microcache:5m max_size=1000m;
 
-proxy_cache_path /mnt/ramdisk/nginx-cache levels=1:2 keys_zone=microcache:5m max_size=1000m;
+upstream backend {
+  server 127.0.0.1:8080;
+}
 
 server {
   listen 80 default;
@@ -24,8 +27,8 @@ server {
     proxy_no_cache $no_cache;
     proxy_cache_bypass $no_cache;
 
-    proxy_redirect   http://127.0.0.1:8080  /;
-    proxy_pass  http://127.0.0.1:8080;
+    proxy_redirect   http://backend  /;
+    proxy_pass  http://backend;
     proxy_cache microcache;
     proxy_cache_key $scheme$host$request_method$request_uri;
     proxy_cache_valid 200 30s;
