@@ -5,6 +5,7 @@ WP-Cache Config Sample File
 See wp-cache.php for author details.
 */
 
+$wp_cache_pages[ "author" ] = 0; //Added by WP-Cache Manager
 $cache_schedule_interval = '0'; //Added by WP-Cache Manager
 $cache_gc_email_me = 0; //Added by WP-Cache Manager
 $cache_time_interval = '3600'; //Added by WP-Cache Manager

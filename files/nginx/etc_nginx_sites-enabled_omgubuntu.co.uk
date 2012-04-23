@@ -30,7 +30,7 @@ server {
   }
 
  location / {
-    try_files "/var/www/omgubuntu.co.uk/wp-content/cache/supercache/backend/${uri}index.html" $uri/ $uri @rewrite;
+    try_files "/var/www/omgubuntu.co.uk/wp-content/cache/supercache/${host}/${uri}index.html" $uri/ $uri @rewrite;
   }
 
   location ~ \.php$ {

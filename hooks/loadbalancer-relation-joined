@@ -44,6 +44,7 @@ server {
   location / {
     proxy_set_header Host $host;
     proxy_pass  http://backend;
+    proxy_redirect   http://backend  /;
   }
 }
 """
@@ -93,6 +94,7 @@ server {
   location / {
     proxy_set_header Host $host;
     proxy_pass  http://admin;
+    proxy_redirect   http://admin  /;
   }
 }
 """
