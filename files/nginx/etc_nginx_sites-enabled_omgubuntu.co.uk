@@ -1,6 +1,6 @@
 server {
-  listen 8080;
-  server_name _;
+  listen 8080 default;
+  server_name www.omgubuntu.co.uk omgubuntu.co.uk _;
   access_log /mnt/access.log;
   error_log /mnt/error.log;
   root   /var/www/omgubuntu.co.uk;
@@ -26,13 +26,20 @@ server {
   location ~* \.(js|css|png|jpg|jpeg|gif|ico|zip|gz|tar)$
   {
     log_not_found off;
+    access_log off;
     expires max;
   }
 
- location / {
-    try_files "/var/www/omgubuntu.co.uk/wp-content/cache/supercache/${host}/${uri}index.html" $uri/ $uri @rewrite;
+  location / {
+    try_files "${document_root}/wp-content/cache/supercache/${host}/${uri}index.html" "${uri}/" "${uri}/index.html" $uri @rewrite;
   }
 
+  location ~ /\. {
+    access_log off;
+    log_not_found off; 
+    deny all;
+  }
+  
   location ~ \.php$ {
     try_files $uri @rewrite;
     include /etc/nginx/fastcgi_params;

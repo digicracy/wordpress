@@ -11,6 +11,15 @@ mv files/php/php_conf.d_apc.ini /etc/php5/conf.d/
 mkdir -p /mnt/tmp
 chmod 1777 /mnt/tmp
 
+mkdir -p /mnt/logs
+chmod 1777 /mnt/logs
+
+## dont make this an actual ramdisk until later when size can be safely tested
+## just using plain disk cache for now
+mkdir -p /mnt/ramdisk/nginx-cache
+chown -R nobody:nogroup /mnt/ramdisk
+chmod -R 1777 /mnt/ramdisk
+
 rm -f /etc/nginx/sites-enabled/*
 rm -f /etc/nginx/conf.d/*
 
