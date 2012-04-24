@@ -1,5 +1,5 @@
 # Default before peer relation is handled
-proxy_cache_path /mnt/ramdisk/proxy-cache levels=1:2 keys_zone=microcache:5m max_size=1000m;
+proxy_cache_path /mnt/ramdisk/proxy-cache levels=1:2 keys_zone=proxycache:5m max_size=1000m;
 
 upstream backend {
   server 127.0.0.1:8080;
@@ -29,9 +29,9 @@ server {
 
     proxy_redirect   http://backend  /;
     proxy_pass  http://backend;
-    proxy_cache microcache;
+    proxy_cache proxycache;
     proxy_cache_key $scheme$host$request_method$request_uri;
-    proxy_cache_valid 200 30s;
+    proxy_cache_valid 200 60s;
     proxy_cache_use_stale updating;
 
     proxy_set_header Host $host;
@@ -45,7 +45,7 @@ server {
              '"$request" $status $body_bytes_sent '
              '"$http_referer" "$http_user_agent" nocache:$no_cache';
     access_log  /mnt/logs/microcache.log custom;
-    
+
   }
 }
 
