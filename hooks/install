@@ -63,3 +63,5 @@ service php5-fpm restart
 service nginx restart
 
 juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"
+
+

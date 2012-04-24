@@ -1,3 +1,10 @@
 #!/bin/bash
 
+
+service php5-fpm stop
+service nginx stop
 /etc/cron.daily/omg-backup
+
+## clear caches here too on fullstop ?
+
+
