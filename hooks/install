@@ -36,10 +36,6 @@ rm -f /etc/nginx/sites-available/omgubuntu.co.uk
 install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_omgubuntu.co.uk /etc/nginx/sites-available/omgubuntu.co.uk
 ln -sf ../sites-available/omgubuntu.co.uk /etc/nginx/sites-enabled/omgubuntu.co.uk
 
-juju-log "Installing Nginx admin config ..."
-rm -f /etc/nginx/sites-available/admin
-install -o root -g root -m 0644 files/nginx/etc_nginx_sites-enabled_admin /etc/nginx/sites-available/admin
-ln -sf /etc/nginx/sites-available/admin /etc/nginx/sites-enabled/admin
 
 juju-log "Installing Nginx loadbal config ..."
 rm -f /etc/nginx/sites-available/loadbalancer
