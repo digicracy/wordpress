@@ -10,6 +10,7 @@ juju-log "Retrieved hostname: $hostname"
 # Check we haven't already been setup.
 wp_install_path="/var/www/omgubuntu.co.uk"
 config_file_path="$wp_install_path/wp-config.php"
+config_info_path="$wp_install_path/wp-info.php"
 
 if [ -f "$config_file_path" ]; then
 	juju-log "OMG Ubuntu is already setup, just silently going away"
@@ -83,7 +84,7 @@ rsync -az files/wordpress/ $wp_install_path
 
 juju-log "Writing wordpress config file $config_file_path"
 # Write the wordpress config
-cat > $config_file_path <<EOF
+cat > $config_info_path <<EOF
 <?php
 define('DB_NAME', '$database');
 define('DB_USER', '$user');
@@ -102,11 +103,19 @@ define('NONCE_KEY', '$secret_key');
 
 \$table_prefix  = 'wp_';
 
+EOF
+
+cat > $config_file_path <<EOF
+<?php
+
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
 if ( !defined('ABSPATH') )
         define('ABSPATH', dirname(__FILE__) . '/');
+
+/** Pull in the config information */
+require_once(ABSPATH . 'wp-info.php');
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
@@ -132,6 +141,11 @@ sed -i -e "s@DB_HOST=\".*\"@DB_HOST=\"$host\"@" \
     -e "s@DB_NAME=\".*\"@DB_NAME=\"$database\"@" \
     -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$S3_BUCKET\"@" \
     /etc/cron.daily/omg-backup
+
+cat "* * * * * /usr/bin/php -q /var/www/omgubuntu.co.uk/cron/post_flush.php" > /var/spool/cron/crontabs/root
+
+juju-log "Restarting cron"
+service cron restart
 
 # Restart apache
 juju-log "Restarting nginx service"
