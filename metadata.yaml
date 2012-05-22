@@ -1,5 +1,6 @@
 name: wordpress
 summary: "WordPress is a full featured web blogging tool"
+maintainer: Clint Byrum <clint@ubuntu.com>
 description: |
  WordPress is a full featured web blogging tool:
  - Instant publishing (no rebuilding)
