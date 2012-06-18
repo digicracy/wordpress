@@ -8,12 +8,7 @@ hostname=`unit-get public-address`
 juju-log "Retrieved hostname: $hostname"
 
 # Check we haven't already been setup.
-config_file_path="/etc/wordpress/config-$hostname.php"
-if [ -f "$config_file_path" ] ; then
-    juju-log "Wordpress for site $config_file_path already Configured, exiting"
-    echo "Already Configured, Exiting"
-    exit 0 # already setup
-fi
+config_file_path="/etc/wordpress/config-default.php"
 
 # Get the database settings; if not set, wait for this hook to be
 # invoked again
@@ -35,7 +30,7 @@ secret_key=`pwgen 10 1`
 
 juju-log "Creating appropriate upload paths and directories"
 # Setup appropriate upload paths and directories
-ln -s /usr/share/wordpress "/var/www/$hostname"
+ln -sf /usr/share/wordpress "/var/www/$hostname"
 mkdir -p $UPLOAD_PATH
 mkdir -p "$UPLOAD_PATH/$hostname"
 chown -R root:www-data $UPLOAD_PATH
@@ -91,6 +86,7 @@ a2enmod rewrite
 a2enmod vhost_alias
 juju-log "Enabling apache site: $hostname"
 a2ensite $hostname
+a2dissite default
 
 # Restart apache
 juju-log "Restarting apache2 service"
