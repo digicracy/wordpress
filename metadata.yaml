@@ -1,14 +1,11 @@
-name: omg-wp
+name: wordpress
 summary: "WordPress is a full featured web blogging tool, OMG! Ubuntu! is a blog."
 description: |
- WordPress is a full featured web blogging tool.
- OMG! Ubuntu! is a blog using WordPress
+ This will install and setup WordPress optimized to run in the cloud. This install, in particular, will 
+ place Ngnix and php-fpm configured to scale horizontally with Nginx's reverse proxy
 requires:
   db:
     interface: mysql
-  cache:
-    interface: memcache
-    optional: true
 provides:
   website:
     interface: http

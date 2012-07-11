@@ -1,21 +1,5 @@
 options:
-  aws-public-key:
+  enable-plugins:
     type: string
-    default: ""
-    description: Amazon Public Key for S3
-  aws-secret-key:
-    type: string
-    default: ""
-    description: Amazon Secret Key for S3
-  s3-bucket:
-    type: string
-    default: ""
-    description: Amazon S3 Bucket
-  flush-opcode-cache:
-    type: boolean
-    default: False
-    description: When set to True will flush the OpCode Cache
-  flush-wp-cache:
-    type: boolean
-    default: False
-    description: When set to True will flush the WordPress SuperCache and LegacyCache
+    default: "false"
+    description: In scale-out environments you typically don't want people to update plugins directly. This will only cause issues with other units.

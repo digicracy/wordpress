@@ -8,12 +8,13 @@ private_name=`hostname -f`
 juju-log "Retrieved hostname: $hostname"
 
 # Check we haven't already been setup.
-wp_install_path="/var/www/omgubuntu.co.uk"
+wp_install_path="/var/www/"
 config_file_path="$wp_install_path/wp-config.php"
 config_info_path="$wp_install_path/wp-info.php"
 
 if [ -f "$config_file_path" ]; then
-	juju-log "OMG Ubuntu is already setup, just silently going away"
+	# No longer to quietly in to that good night. Update the wp-config file with new DB values
+	juju-log "WordPress is already setup, just silently going away"
 	exit 0
 fi
 
@@ -26,15 +27,15 @@ if [ -z "$database" ] ; then
     exit 0
 fi
 
-S3_BUCKET=`config-get s3-bucket`
-
 secret_key=`pwgen 10 1`
+echo $secret_key > wp_secret
 source "/usr/share/charm-helper/sh/net.sh"
 
 ##
 # OH COME ON WORDPRESS.ORG NO VALID SSL CERTIFICATE?
 # Psh, whatever, plain-text for now. #blamenacin
 # https://twitter.com/#!/marcoceppi/status/181570187655520260
+# I was wrong, we need to use something other than WGET, like cURL
 LATEST_WORDPRESS="http://wordpress.org/latest.tar.gz"
 DOWNLOAD=`ch_get_file "$LATEST_WORDPRESS" "http://wordpress.org/latest.tar.gz.sha1"`
 ##
@@ -55,31 +56,7 @@ rsync -az wordpress/ $wp_install_path
 juju-log "Clean up"
 rm -rf wordpress
 
-if [ -f /etc/default/s3cmd ] ; then
-	juju-log "Check if we've actually created this Database before"
-	CUR_TABLE_COUNT=`mysql -h $host -u $user -p$password -Nse "SELECT count(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=\"$database\""`
-	if [ $CUR_TABLE_COUNT -eq 0 ]; then
-		juju-log "Get the last database dump"
-		mkdir -p /mnt/restore/
-		LATEST=`s3cmd -c /etc/default/s3cmd ls s3://$S3_BUCKET/backups/ | tail -n 1 | awk '{ print $4 }'`
-		juju-log "$LATEST dump"
-		s3cmd -c /etc/default/s3cmd get $LATEST /mnt/restore/
-
-		juju-log "Extracting"
-		tar -xzf /mnt/restore/$(basename $LATEST)
-
-		juju-log "Pushing in to MySQL"
-		mysql -h $host -u $user -p$password $database < *.sql
-		rm -f *.sql
-	else
-		juju-log "I am a not unique, a database already exists"
-	fi
-else
-    juju-log "No AWS Credentials, not restoring database from S3"
-    exit 2
-fi
-
-juju-log "Dropping OMG specific files: Themes, plugins, etc in to position"
+juju-log "Dropping User specific files: Themes, plugins, etc in to position"
 rsync -az files/wordpress/ $wp_install_path
 
 juju-log "Writing wordpress config file $config_file_path"
@@ -129,28 +106,9 @@ juju-log "Enabling apache site: $hostname"
 
 chown -R www-data.www-data $wp_install_path
 
-if [ ! -f /etc/cron.daily/omg-backup ]; then
-	juju-log "Put the backup process in place"
-	rsync -az files/omg-backup /etc/cron.daily/
-	chmod 0755 /etc/cron.daily/omg-backup
-fi
-
-sed -i -e "s@DB_HOST=\".*\"@DB_HOST=\"$host\"@" \
-    -e "s@DB_USER=\".*\"@DB_USER=\"$user\"@" \
-    -e "s@DB_PASS=\".*\"@DB_PASS=\"$password\"@" \
-    -e "s@DB_NAME=\".*\"@DB_NAME=\"$database\"@" \
-    -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$S3_BUCKET\"@" \
-    /etc/cron.daily/omg-backup
-
-cat "* * * * * /usr/bin/php -q /var/www/omgubuntu.co.uk/cron/post_flush.php" > /var/spool/cron/crontabs/root
-
-juju-log "Restarting cron"
-service cron restart
-
-# Restart apache
+# Restart nginx
 juju-log "Restarting nginx service"
 service nginx restart
 
 # Make it publicly visible, once the wordpress service is exposed
 open-port 80/tcp
-open-port 8080/tcp

@@ -2,35 +2,3 @@
 
 set -ue
 
-rm -f /etc/default/s3cmd
-
-flush_opcode=`config-get flush-opcode-cache`
-
-if [ "$flush_opcode" = "True" ]; then
-	juju-log "Flushing OpCode"
-	curl "http://localhost:8080/deets/apc.php?CC=1" > /dev/null
-fi
-
-flush_cache=`config-get flush-wp-cache`
-
-if [ "$flush_cache" = "True" ]; then
-	juju-log "Flushing WordPress Cache"
-	rm -f /var/www/omgubuntu.co.uk/wp-content/cache/wp-cache*.html /var/www/omgubuntu.co.uk/wp-content/cache/supercache/*/index.html*
-fi
-
-aws_access_key=`config-get aws-public-key`
-aws_secret_key=`config-get aws-secret-key`
-s3_bucket=`config-get s3-bucket`
-
-[ -n "$aws_access_key" ] || exit 0
-[ -n "$aws_secret_key" ] || exit 0
-
-rsync files/s3cmd /etc/default/
-
-sed -i -e "s@access_key =.*@access_key = $aws_access_key@" \
-    -e "s@secret_key =.*@secret_key = $aws_secret_key@" \
-    /etc/default/s3cmd
-
-if [ -f /etc/cron.daily/omg-backup ]; then
-	sed -i -e "s@S3_BUCKET=\".*\"@S3_BUCKET=\"$s3_bucket\"@" /etc/cron.daily/omg-backup
-fi

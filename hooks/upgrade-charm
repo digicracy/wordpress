@@ -1,10 +1,11 @@
 #!/bin/bash
 
-./hooks/install
+# Run the install again!
+hooks/install
 
-wp_install_path="/var/www/omgubuntu.co.uk/"
+wp_install_path="/var/www/"
 
-juju-log "Upgrading OMG specific files: Themes, plugins, etc in to position"
+juju-log "Upgrading User specific files: Themes, plugins, etc in to position"
 rsync -razvP files/wordpress/ $wp_install_path
 chown -R www-data.www-data $wp_install_path
 
