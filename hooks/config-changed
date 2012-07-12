@@ -2,3 +2,5 @@
 
 set -ue
 
+tuning_level=`config-get tuning`
+
