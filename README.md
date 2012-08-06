@@ -31,13 +31,21 @@ A use case for each tuning style is outlined below:
 The Bare configuration option is meant for those who wish to run the stock WordPress setup with no caching, no manipulation of data, 
 and no additional scale out features enabled. This is ideal if you intend to install additional plugins to deal with coordinating
 WordPress units or simply wish to test drive WordPress as it is out of the box. This will still create a load-balancer when an additional
-unit is created, though everything else will be turned off (WordPress caching, APC OpCode caching, and NFS file sharing)
+unit is created, though everything else will be turned off (WordPress caching, APC OpCode caching, and NFS file sharing).
+
+To run this WordPress charm under a bare tuning level execute the following:
+
+    juju set wordpress tuning-level=bare
 
 ## Single
 
 When running in Single mode, this charm will make every attempt to provide a solid base for your WordPress install. By running in single
 the following will be enabled: Nginx microcache, APC OpCode caching, WordPress caching module, and a basic NFS mount. While Single mode
 is designed to allow for scaling out, it's meant to only scale out for temporary relief; say in the event of a large traffic in-flux.
+
+To run this WordPress charm under a single tuning level execute the following:
+
+    juju set wordpress tuning-level=single
 
 ## Optimized
 
@@ -47,6 +55,9 @@ is disabled. By doing this the charm can drop the need for an NFS mount which is
 Everything else provided in Single level is available. In order to install or modify plugins with this setup you'll need to edit and commit
 them to a forked version of the charm in the files/wordpress/ directory.
 
+To run this WordPress charm under an optimized tuning level execute the following:
+
+    juju set wordpress tuning-level=optimized
 
 # Caveats
 
