@@ -23,7 +23,7 @@ Expose the WordPress installation
 
 # Configuration
 
-This WordPress charm comes with several tuning-levels designed to encompass the different styles in which this charm will be used.
+This WordPress charm comes with several tuning levels designed to encompass the different styles in which this charm will be used.
 A use case for each tuning style is outlined below:
 
 ## Bare
@@ -35,7 +35,7 @@ unit is created, though everything else will be turned off (WordPress caching, A
 
 To run this WordPress charm under a bare tuning level execute the following:
 
-    juju set wordpress tuning-level=bare
+    juju set wordpress tuning=bare
 
 ## Single
 
@@ -45,7 +45,7 @@ is designed to allow for scaling out, it's meant to only scale out for temporary
 
 To run this WordPress charm under a single tuning level execute the following:
 
-    juju set wordpress tuning-level=single
+    juju set wordpress tuning=single
 
 ## Optimized
 
@@ -57,7 +57,7 @@ them to a forked version of the charm in the files/wordpress/ directory.
 
 To run this WordPress charm under an optimized tuning level execute the following:
 
-    juju set wordpress tuning-level=optimized
+    juju set wordpress tuning=optimized
 
 # Caveats
 
