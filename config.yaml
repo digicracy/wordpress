@@ -1,8 +1,4 @@
 options:
-  enable-plugins:
-    type: string
-    default: "false"
-    description: In scale-out environments you typically don't want people to update plugins directly. This will only cause issues with other units.
   tuning:
     type: string
     default: "single"
@@ -13,4 +9,3 @@ options:
         limitations that typically happen during "optimized". While you _can_ scale out with this setting I encourage you read the README
       Optimized will give you a hardened WordPress setup. Some of the features in the Admin panel will be locked down and theme edits/plugins
         can only be updated through he charm. This is the recommended setup for those who are in serious need of constant scaling.
-

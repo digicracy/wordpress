@@ -1,3 +1,3 @@
-This deploys the OMG! Ubuntu! WordPress install. You'll need to add AWS credentials outlined in the config file in order to complete the setup.
+# Overview
 
-Sorry, charm is open, data is not :)
+WordPress is a powerful blogging platform written in PHP.
