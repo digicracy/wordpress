@@ -2,7 +2,8 @@ options:
   tuning:
     type: string
     default: "single"
-    description: | This is the tuning level for the WordPress setup. There are three options: bare, single, and optimized.
+    description: | 
+      This is the tuning level for the WordPress setup. There are three options: bare, single, and optimized.
       Bare will give you a nearly un-altered WordPress setup, as if you'd downloaded and set it up yourself.
       Single will provide you with everything you need to run a singlular unit of WordPress. This doesn't take in to 
         consideration that you'll be scaling at all. However, it will allow you to use WordPress free of any troubles and pesky 
