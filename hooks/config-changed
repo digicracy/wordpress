@@ -2,6 +2,13 @@
 
 set -ue
 
+make_bare()
+{
+	# Un-do APC
+	# If there's an NFS mount remove it?
+
+}
+
 tuning_level=`config-get tuning`
 
 if[ "$tuning_level" == "optimized" ]; then
