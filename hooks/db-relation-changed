@@ -4,7 +4,7 @@ set -eu
 
 juju-log "We've got a db"
 
-source etc/paths
+source inc/common
 
 if [ -f "$config_file_path" ]; then
 	# No longer to quietly in to that good night. Update the wp-config file with new DB values
