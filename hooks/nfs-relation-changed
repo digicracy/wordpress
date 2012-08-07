@@ -25,9 +25,4 @@ MOUNT_PATH=$mountpoint
 
 EOF
 
-level=`config-get tuning`
-level=${level,,}
-
-juju-log "Re-compile everything which should take care of mounting if we _need_ to"
-
-make_$level
+. hooks/config-changed

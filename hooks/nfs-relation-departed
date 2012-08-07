@@ -17,9 +17,4 @@ rm -f .nfs-mount
 
 juju-log "Fairwell nfs mount, we hardly knew you"
 
-level=`config-get tuning`
-level=${level,,}
-
-juju-log "Re-compile everything which should take care magic"
-
-make_$level
+. hooks/config-changed

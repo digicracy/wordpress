@@ -103,10 +103,7 @@ juju-log "Enabling apache site: $hostname"
 
 chown -R www-data.www-data $wp_install_path
 
-level=`config-get tuning`
-level=${level,,}
-
-make_$level
+. hooks/config-changed
 
 # Restart nginx
 juju-log "Restarting nginx service"
