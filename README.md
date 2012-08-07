@@ -65,10 +65,10 @@ To run this WordPress charm under an optimized tuning level execute the followin
 
 ## Single mode and the scale-out
 
-If you're in Single mode and you want to/need to scale out; but you've been upgrading, modifying, and well just using the control panel like
-a normal WordPress install, you can still scale out but you'll need to deploy a shared-fs charm first. At the time of this writing only the
-NFS charm will work, but as more shared-fs charms come out (gluster, ceph, etc) that provide a shared-fs/mount interface those should all
-work as well. In this example we'll use NFS:
+If you're in Single mode and you want to/need to scale out, but you've been upgrading, modifying, and installing plugins + themes like
+a normal WordPress user on a normal install; you can still scale out but you'll need to deploy a shared-fs charm first. At the time of
+this writing only the NFS charm will work, but as more shared-fs charms come out (gluster, ceph, etc) that provide a shared-fs/mount 
+interface those should all work as well. In this example we'll use NFS:
 
     juju deploy nfs
     juju add-relation nfs wordpress
@@ -82,7 +82,7 @@ running, and related you can scale out the WordPress unit using the following co
 In the event you want more than one unit at a time (and do not wish to run the add-unit command multiple times) you can supply a `-n` number
 of units to add, so to add three more units:
 
-    juju add-unit -n 3 wordpress
+    juju add-unit -n3 wordpress
     
 ## I don't want to run three different machines for one WP install
 
