@@ -2,57 +2,7 @@
 
 set -ue
 
-source etc/paths
-
-make_bare()
-{
-	# Un-do APC
-	rm -f /etc/php5/conf.d/apc.ini
-	# IF there is an NFS mount, get everything out of it
-	if [ -f .nfs-mount ]; then
-		rm -f /var/www/wp-content
-		rsync -az /mnt/wordpress/wp-content /var/www/
-	fi
-
-	echo "<?php" > $config_override_path
-}
-
-make_single()
-{
-	make_bare()
-	juju-log "Installing PHP apc.ini ..."
-	rm -f /etc/php5/conf.d/apc.ini
-	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
-}
-
-make_optimized()
-{
-	make_single()
-	cat > $config_override_path <<EOF
-<?php
-define('DISALLOW_FILE_MODS', TRUE);
-
-EOF
-}
-
-make_nfs()
-{
-	if [ -f .nfs-mount ]; then
-		# This has all the NFS mount stuff in it
-		source .nfs-mount
-		mkdir -p /mnt/wordpress
-		mount -t $MOUNT_TYPE -o $MOUNT_OPS $MOUNT_SERVER:/ /mnt/wordpress
-		if[ $? -ne 0 ]; then
-			juju-log "Could not connect to file-server"
-			exit 1 # OH THE HUMANITY OF IT ALL
-		fi
-		rsync -az /var/www/wp-content /mnt/wordpress/
-		mv /var/www/wp-content /var/www/wp-content.bak.$(date +%Y%m%d-%H%M%S) && rm -rf /var/www/wp-content
-		ln -s /mnt/wordpress/wp-content /var/www/
-	else
-		juju-log "There is no nfs mount, not sure what to do, so we'll just bail"
-	fi
-}
+source inc/common
 
 tuning_level=`config-get tuning`
 
