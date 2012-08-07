@@ -71,7 +71,7 @@ this writing only the NFS charm will work, but as more shared-fs charms come out
 interface those should all work as well. In this example we'll use NFS:
 
     juju deploy nfs
-    juju add-relation nfs wordpress
+    juju add-relation nfs wordpress:nfs
 
 By doing so, everything in the wp-contents directory is moved to this NFS mount and then shared to all future WordPress units. It's strongly
 recommended that you first deploy the nfs mount, _then_ scale WordPress out. Failure to do so may result in data loss. Once nfs is deployed, 
