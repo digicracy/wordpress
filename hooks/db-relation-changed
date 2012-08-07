@@ -3,14 +3,8 @@
 set -eu
 
 juju-log "We've got a db"
-hostname=`unit-get public-address`
-private_name=`hostname -f`
-juju-log "Retrieved hostname: $hostname"
 
-# Check we haven't already been setup.
-wp_install_path="/var/www/"
-config_file_path="$wp_install_path/wp-config.php"
-config_info_path="$wp_install_path/wp-info.php"
+source etc/paths
 
 if [ -f "$config_file_path" ]; then
 	# No longer to quietly in to that good night. Update the wp-config file with new DB values
@@ -93,6 +87,7 @@ if ( !defined('ABSPATH') )
 
 /** Pull in the config information */
 require_once(ABSPATH . 'wp-info.php');
+include_once(ABSPATH . 'wp-overrides.php');
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
@@ -100,7 +95,9 @@ require_once(ABSPATH . 'wp-settings.php');
 remove_filter('template_redirect', 'redirect_canonical');
 
 EOF
+
 chmod 0644 $config_file_path
+touch /var/www/wp-overrides.php
 
 juju-log "Enabling apache site: $hostname"
 

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+hostname=`unit-get public-address`
+private_name=`hostname -f`
+
+wp_install_path="/var/www/"
+config_file_path="$wp_install_path/wp-config.php"
+config_info_path="$wp_install_path/wp-info.php"
+config_override_path="$wp_install_path/wp-override.php"
