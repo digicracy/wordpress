@@ -7,6 +7,8 @@ description: |
 requires:
   db:
     interface: mysql
+  shared-fs:
+    interface: mount
 provides:
   website:
     interface: http

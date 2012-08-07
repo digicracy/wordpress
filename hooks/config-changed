@@ -2,6 +2,8 @@
 
 set -ue
 
+source etc/paths
+
 make_bare()
 {
 	# Un-do APC
@@ -11,19 +13,26 @@ make_bare()
 		rm -f /var/www/wp-content
 		rsync -az /mnt/wordpress/wp-content /var/www/
 	fi
+
+	echo "<?php" > $config_override_path
 }
 
 make_single()
 {
+	make_bare()
 	juju-log "Installing PHP apc.ini ..."
 	rm -f /etc/php5/conf.d/apc.ini
 	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
-	# Check if we have an nfs-mount and magic that sucker up.
 }
 
 make_optimized()
 {
-	# First thing is first, STOP ALL THE PLUGINS
+	make_single()
+	cat > $config_override_path <<EOF
+<?php
+define('DISALLOW_FILE_MODS', TRUE);
+
+EOF
 }
 
 make_nfs()
@@ -52,13 +61,17 @@ if[ "$tuning_level" == "optimized" ]; then
 	# themes and upload/update plugins. This breaks a scale-out
 	# environment. It's sad but true. If you want to update a plugin
 	# install a theme, etc; take a look at the README.
+	make_optimized()
 elif[ "$tuning_level" == "single" ]; then
 	# We need to prepare an NFS mount, because someone is probably
-	# going to try to scale out. We also need to vamp up caching
+	# going to try to scale out. We also need to vamp up caching.
+	make_single()
+	make_nfs()
 elif[ "$tuning_level" == "bare" ]; then
 	# Okay, you know what you're doing. You're probably going to
 	# use Gluster to stream-line your files, so you don't need to
 	# disable anything. We trust you to do what you need to.
+	make_bare()
 else
 	juju-log "Not sure about that tuning level."
 	exit 1
