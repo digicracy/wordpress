@@ -9,6 +9,8 @@ requires:
     interface: mysql
   shared-fs:
     interface: mount
+  nfs:
+    interface: mount
 provides:
   website:
     interface: http
