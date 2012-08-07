@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -eu
+
+juju-log "We've got a mount"
+source inc/common
+
+if [ -f "$config_file_path" ]; then
+	# No longer to quietly in to that good night. Update the wp-config file with new DB values
+	juju-log "WordPress is already setup, just silently going away"
+	exit 0
+fi
+
+options=`relation-get options`
+mountpoint=`relation-get mountpoint`
+fstype=`relation-get fstype`
+host=`relation-get private-address`
+
+if [ -z "$fstype" ] ; then
+	juju-log "Going to wait for some real data"
+    exit 0
+fi
+
+# Write this out to our .nfs-mount file
+cat > .nfs-mount <<EOF
+#!/bin/bash
+MOUNT_TYPE=$fstype
+MOUNT_OPS=$options
+MOUNT_SERVER=$host
+MOUNT_PATH=$mountpoint
+
+EOF
+
+level=`config-get tuning`
+level=${level,,}
+
+juju-log "Re-compile everything which should take care of mounting if we _need_ to"
+
+make_$level
