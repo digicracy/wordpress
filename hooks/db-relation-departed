@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source etc/paths
+
+rm -f $config_file_path
