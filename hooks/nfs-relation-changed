@@ -5,12 +5,6 @@ set -eu
 juju-log "We've got a mount"
 source inc/common
 
-if [ -f "$config_file_path" ]; then
-	# No longer to quietly in to that good night. Update the wp-config file with new DB values
-	juju-log "WordPress is already setup, just silently going away"
-	exit 0
-fi
-
 options=`relation-get options`
 mountpoint=`relation-get mountpoint`
 fstype=`relation-get fstype`

@@ -87,7 +87,7 @@ if ( !defined('ABSPATH') )
 
 /** Pull in the config information */
 require_once(ABSPATH . 'wp-info.php');
-include_once(ABSPATH . 'wp-overrides.php');
+require_once(ABSPATH . 'wp-overrides.php');
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
@@ -97,11 +97,16 @@ remove_filter('template_redirect', 'redirect_canonical');
 EOF
 
 chmod 0644 $config_file_path
-touch /var/www/wp-overrides.php
+touch $config_override_path
 
 juju-log "Enabling apache site: $hostname"
 
 chown -R www-data.www-data $wp_install_path
+
+level=`config-get tuning`
+level=${level,,}
+
+make_$level
 
 # Restart nginx
 juju-log "Restarting nginx service"

@@ -7,7 +7,7 @@ private_name=`hostname -f`
 wp_install_path="/var/www/"
 config_file_path="$wp_install_path/wp-config.php"
 config_info_path="$wp_install_path/wp-info.php"
-config_override_path="$wp_install_path/wp-override.php"
+config_override_path="$wp_install_path/wp-overrides.php"
 
 ####
 ## The only hook who should ever remove the NFS mount is the nfs-relation-(departed|broken) hook
@@ -33,17 +33,17 @@ make_bare()
 
 make_single()
 {
-	make_bare()
+	make_bare
 	juju-log "Installing PHP apc.ini ..."
 	rm -f /etc/php5/conf.d/apc.ini
 	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
-	make_nfs()
+	make_nfs
 	juju-log "We are now single"
 }
 
 make_optimized()
 {
-	make_single()
+	make_single
 	cat > $config_override_path <<EOF
 <?php
 define('DISALLOW_FILE_MODS', TRUE);
@@ -61,7 +61,7 @@ make_nfs()
 			juju-log "We're already mounted."
 		else
 			mount -t $MOUNT_TYPE -o $MOUNT_OPS $MOUNT_SERVER:$MOUNT_PATH /mnt/wordpress
-			if[ $? -ne 0 ]; then
+			if [ $? -ne 0 ]; then
 				juju-log "Could not connect to file-server"
 				exit 1 # OH THE HUMANITY OF IT ALL
 			fi
