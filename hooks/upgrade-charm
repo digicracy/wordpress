@@ -9,5 +9,4 @@ juju-log "Upgrading User specific files: Themes, plugins, etc in to position"
 rsync -razvP files/wordpress/ $wp_install_path
 chown -R www-data.www-data $wp_install_path
 
-service php5-fpm restart
-service nginx restart
+source hooks/restart
