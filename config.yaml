@@ -12,7 +12,7 @@ options:
         can only be updated through he charm. This is the recommended setup for those who are in serious need of constant scaling. 
   wp-content:
     type: string
-    default: "git@github.com:jujutools/wordpress-site.git"
+    default: "https://github.com/jujutools/wordpress-site.git"
     description: | 
       This is a full repository path to where the WordPress wp-contents can be found. At this time both Git and Bzr are
       supported. An example of what a wp-content repository should look like can be found at http://github.com/jujutools/wordpress-site.
