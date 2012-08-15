@@ -92,7 +92,7 @@ do_vcs()
 		source .wp-repo
 	fi
 
-	if [ "$NEW_REPO_URL" -ne "$REPO_URL" ]; then
+	if [ "$NEW_REPO_URL" != "$REPO_URL" ]; then
 		# We need to determine what kind of URL this is
 		if [ $(echo "$NEW_REPO_PATH" | egrep -Ec "^(lp:\~|bzr:\/\/|bzr+ssh:\/\/)") -eq 1 ]; then
 			local repo_type="bzr"

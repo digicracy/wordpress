@@ -98,6 +98,21 @@ or
 Setting the wp-content option to an empty string ("") will result in no further updates being pulled from that repository; however, the last pull will remain 
 on the system and will not be removed.
 
+## debug
+
+This option will create a directory `_debug` at the root of each unit (`http://unit-address/_debug`). In this directory are two scripts: info.php and apc.php. info.php 
+is a simple phpinfo script that will outline exactly how the environment is configured. apc.php is the APC admin portal which provides APC caching details in addition 
+to several administrative functions like clearing the APC cache. This should never be set to "yes" in production as it exposes detailed information about the environments 
+and may provide a way for an intruder to DDoS the machine.
+
+    juju set wordpress debug=yes
+
+to disable
+
+    juju set wordpress debug=no
+
+The default is to have debugging disabled.
+
 # Caveats
 
 ## Single mode and the scale-out

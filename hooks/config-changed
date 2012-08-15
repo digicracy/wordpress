@@ -9,10 +9,20 @@ tuning_level=`config-get tuning`
 tuning_level=${tuning_level,,}
 
 wp_content_repo=`config-get wp-content`
+expose_info=`config-get debug-mode`
+expose_info=${debug-mode,,}
 
 if [ ! -f $config_file_path ]; then
 	juju-log "Nothing to configure, since nothing is installed"
 	exit 0
+fi
+
+juju-log "Show details? $expose_info"
+
+if [ "$expose_info" == "yes" ]; then
+	rsync -az files/_debug $wp_install_path/
+else
+	rm -rf $wp_install_path/_debug
 fi
 
 juju-log "I will be using this tuning level: $tuning_level"

@@ -15,4 +15,12 @@ options:
     default: "git@github.com:jujutools/wordpress-site.git"
     description: | 
       This is a full repository path to where the WordPress wp-contents can be found. At this time both Git and Bzr are
-      supported. An example of what a wp-content repository should look like can be found at http://github.com/jujutools/wordpress-site
+      supported. An example of what a wp-content repository should look like can be found at http://github.com/jujutools/wordpress-site.
+  debug:
+    type: string
+    default: "no"
+    description: |
+      Setting this option to "yes" will expose /_debug on all instances over HTTP. In the _debug folder are two scripts, info.php and apc.php. 
+      info.php will display the phpinfo information for that server while the apc.php will provide APC cache stats (as well as additional administrative 
+      options for APC).
+      
