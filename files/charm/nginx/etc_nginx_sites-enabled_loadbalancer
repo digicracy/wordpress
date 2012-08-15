@@ -7,7 +7,7 @@ upstream backend {
 
 server {
   listen 80 default;
-  server_name www.omgubuntu.co.uk omgubuntu.co.uk _;
+  server_name _;
   location / {
     set $no_cache "";
 
