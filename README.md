@@ -24,9 +24,12 @@ Expose the WordPress installation
 # Configuration
 
 This WordPress charm comes with several tuning levels designed to encompass the different styles in which this charm will be used.
+
+## Tuning
+
 A use case for each tuning style is outlined below:
 
-## Bare
+### Bare
 
 The Bare configuration option is meant for those who wish to run the stock WordPress setup with no caching, no manipulation of data, 
 and no additional scale out features enabled. This is ideal if you intend to install additional plugins to deal with coordinating
@@ -37,7 +40,7 @@ To run this WordPress charm under a bare tuning level execute the following:
 
     juju set wordpress tuning=bare
 
-## Single
+### Single
 
 When running in Single mode, this charm will make every attempt to provide a solid base for your WordPress install. By running in single
 the following will be enabled: Nginx microcache, APC OpCode caching, WordPress caching module, and the ability to sync files via NFS.
@@ -49,7 +52,7 @@ To run this WordPress charm under a single tuning level execute the following:
 
     juju set wordpress tuning=single
 
-## Optimized
+### Optimized
 
 If you need to run WordPress on more than one instance constantly, or require scaling out and in on a regular basis, then Optimized is the
 recommended configuration. When you run WordPress under an Optimized tuning level, the ability to install, edit, and upgrade themes and plugins
@@ -60,6 +63,40 @@ them to a forked version of the charm in the files/wordpress/ directory.
 To run this WordPress charm under an optimized tuning level execute the following:
 
     juju set wordpress tuning=optimized
+
+## wp-content
+
+In order to allow for custom WordPress content within the Juju charm a separate configuration option exists for pointing to any Git or Bzr 
+repository. An example of a valid formed wp-content repository can be found on the [Juju Tools Github page](https://github.com/jujutools/wordpress-site). 
+To set the wp-content directive to a git repository, use one of the following formats making sure to replace items like `host`, `path`, and `repo` with their 
+respective names:
+
+    juju set wordpress wp-content=git@host:path/repo.git
+
+or
+
+    juju set wordpress wp-content=http://host/path/repo.git
+    
+or
+
+    juju set wordpress wp-content=git://host/path/repo.git
+    
+If you wish to use a bzr repository, then apply one of the following schemes replacing items like `host`, `username`, `path`, and `repo` with their respective values:
+
+For LaunchPad hosted repostiories:
+
+    juju set wordpress wp-content=lp:~username/path/repo
+    
+For other Bzr repositories:
+
+    juju set wordpress wp-content=bzr://host/path/repo
+
+or
+
+    juju set wordpress wp-content=bzr+ssh://host/path/repo
+    
+Setting the wp-content option to an empty string ("") will result in no further updates being pulled from that repository; however, the last pull will remain 
+on the system and will not be removed.
 
 # Caveats
 

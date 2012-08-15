@@ -5,12 +5,17 @@ set -ue
 source inc/common
 
 tuning_level=`config-get tuning`
+# Make it lower case
 tuning_level=${tuning_level,,}
+
+wp_content_repo=`config-get wp-content`
 
 if [ ! -f $config_file_path ]; then
 	juju-log "Nothing to configure, since nothing is installed"
 	exit 0
 fi
+
+juju-log "I will be using this tuning level: $tuning_level"
 
 if [ "$tuning_level" == "optimized" ]; then
 	# First and foremost, we need to disable the ability to edit
@@ -32,4 +37,6 @@ else
 	exit 1
 fi
 
-service php5-fpm restart
+do_vcs $wp_content_repo
+
+. hooks/restart
