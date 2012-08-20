@@ -10,7 +10,7 @@ tuning_level=${tuning_level,,}
 
 wp_content_repo=`config-get wp-content`
 expose_info=`config-get debug`
-expose_info=${debug-mode,,}
+expose_info=${expose_info,,}
 
 if [ ! -f $config_file_path ]; then
 	juju-log "Nothing to configure, since nothing is installed"
@@ -48,5 +48,7 @@ else
 fi
 
 do_vcs $wp_content_repo
+
+chown -R www-data.www-data $wp_install_path
 
 . hooks/restart

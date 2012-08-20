@@ -50,9 +50,6 @@ rsync -az wordpress/ $wp_install_path
 juju-log "Clean up"
 rm -rf wordpress
 
-juju-log "Dropping User specific files: Themes, plugins, etc in to position"
-rsync -az files/wordpress/ $wp_install_path
-
 juju-log "Writing wordpress config file $config_file_path"
 # Write the wordpress config
 cat > $config_info_path <<EOF
