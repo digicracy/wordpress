@@ -9,6 +9,8 @@ requires:
     interface: mysql
   nfs:
     interface: mount
+  cache:
+    interface: memcache
 provides:
   website:
     interface: http

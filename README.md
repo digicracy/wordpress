@@ -100,18 +100,18 @@ on the system and will not be removed.
 
 ## debug
 
-This option will create a directory `_debug` at the root of each unit (`http://unit-address/_debug`). In this directory are two scripts: info.php and apc.php. info.php 
-is a simple phpinfo script that will outline exactly how the environment is configured. apc.php is the APC admin portal which provides APC caching details in addition 
-to several administrative functions like clearing the APC cache. This should never be set to "yes" in production as it exposes detailed information about the environments 
-and may provide a way for an intruder to DDoS the machine.
+This option will create a directory `_debug` at the root of each unit (`http://unit-address/_debug`). In this directory are two scripts: info.php (`/_debug/info.php`) 
+and apc.php (`/_debug/apc.php`). info.php is a simple phpinfo script that will outline exactly how the environment is configured. apc.php is the APC admin portal which 
+provides APC caching details in addition to several administrative functions like clearing the APC cache. This should never be set to "yes" in production as it exposes 
+detailed information about the environments and may provide a way for an intruder to DDoS the machine.
 
     juju set wordpress debug=yes
 
-to disable
+to disable debugging:
 
     juju set wordpress debug=no
 
-The default is to have debugging disabled.
+The debugging is disabled by default.
 
 # Caveats
 
@@ -135,6 +135,19 @@ In the event you want more than one unit at a time (and do not wish to run the a
 of units to add, so to add three more units:
 
     juju add-unit -n3 wordpress
+
+## I want more caching, I want MEMCACHING!
+
+Why not? We could ALL use more caching. Deploy a memcached server and relate it to your WordPress service to add memcache caching. This will 
+automagically install [WP-FFPC](http://wordpress.org/extend/plugins/wp-ffpc/) (regardless of your tuning settings) and configure it to cache 
+rendered pages to the memcache server. In addition to this layer of caching, Nginx will be pull directly from memcache bypassing PHP altogether. 
+You could theoretically do this, then turn off php5-fpm on all your servers and just have Nginx serve static content during peak times 
+(though, you wouldn't be able to access the admin panel or any uncached pages - it's just a potential scenario).
+
+    juju deploy memcached
+    juju add-relation memcached wordpress
+    
+This setup will also synchronize the flushing of cache across all WordPress nodes, making it idea to avoid stale caches.
     
 ## I don't want to run three different machines for one WP install
 

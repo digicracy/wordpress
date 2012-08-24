@@ -49,6 +49,12 @@ fi
 
 do_vcs $wp_content_repo
 
+if [ -z "$wp_content_repo" ]; then
+	wp plugin update --path=$wp_install_path --all
+fi
+
+do_cache
+
 chown -R www-data.www-data $wp_install_path
 
 . hooks/restart
