@@ -1,3 +1,58 @@
 #!/bin/bash
 
-apt-get -y install wordpress pwgen
+add-apt-repository ppa:charmers/charm-helpers
+
+apt-get update && apt-get -y upgrade
+apt-get -y install php5-memcache mysql-client pwgen nginx php5 php5-fpm php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt charm-helper-sh s3cmd php5-curl rsync nfs-common bzr git-core mktemp
+
+modprobe nfs
+
+juju-log "Removing PHP Default Cron ..."
+rm -f /etc/cron.d/php5
+
+juju-log "Making /mnt/tmp dir ..."
+mkdir -p /mnt/tmp
+chmod 1777 /mnt/tmp
+
+juju-log "Making /mnt/logs ..."
+mkdir -p /mnt/logs/php-fpm
+chmod -R 1777 /mnt/logs
+
+## dont make this an actual ramdisk until later when size can be safely tested
+## just using plain disk cache for now
+juju-log "Making Ramdisk mount point and config ..."
+mkdir -p /mnt/ramdisk/proxy-cache
+mkdir -p /mnt/ramdisk/phpfpm-cache
+chmod -R 1777 /mnt/ramdisk
+
+juju-log "Cleaning any old or default nginx site configs ..."
+rm -f /etc/nginx/sites-enabled/*
+rm -f /etc/nginx/conf.d/*
+
+juju-log "Installing Nginx common config ..."
+rm -f /etc/nginx/nginx.conf
+install -o root -g root -m 0644 files/charm/nginx/etc_nginx_nginx.conf /etc/nginx/nginx.conf
+
+juju-log "Installing Nginx actual site config ..."
+#rm -f /etc/nginx/sites-available/
+install -o root -g root -m 0644 files/charm/nginx/etc_nginx_sites-enabled_wordpress /etc/nginx/sites-available/wordpress
+ln -sf ../sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+
+juju-log "Installing Nginx loadbal config ..."
+rm -f /etc/nginx/sites-available/loadbalancer
+install -o root -g root -m 0644 files/charm/nginx/etc_nginx_sites-enabled_loadbalancer /etc/nginx/sites-available/loadbalancer
+ln -sf ../sites-available/loadbalancer /etc/nginx/sites-enabled/loadbalancer
+
+juju-log "Installing PHP-FPM pool configs ..."
+rm -f /etc/php5/fpm/pool.d/*
+install -o root -g root -m 0644 files/charm/php/php5-fpm_pool.d_www.conf /etc/php5/fpm/pool.d/www.conf
+
+juju-log "Moving PHP and Nginx var dirs to /mnt storage ..."
+rsync -avz /var/lib/nginx /mnt/ && rm -rf /var/lib/nginx && ln -s /mnt/nginx /var/lib/
+rsync -avz /var/lib/php5 /mnt/ && rm -rf /var/lib/php5 && ln -s /mnt/php5 /var/lib/
+
+juju-log "Restarting Services ..."
+service php5-fpm restart
+service nginx restart
+
+juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"

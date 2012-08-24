@@ -1,46 +1,58 @@
 #!/bin/bash
 
-set -eu # -x for verbose logging to juju debug-log
+set -eu
 
-UPLOAD_PATH="/var/www/wp-uploads"
+juju-log "We've got a db"
 
-hostname=`unit-get public-address`
-juju-log "Retrieved hostname: $hostname"
+source inc/common
 
-# Check we haven't already been setup.
-config_file_path="/etc/wordpress/config-default.php"
-
-# Get the database settings; if not set, wait for this hook to be
-# invoked again
-database=`relation-get database`
-if [ -z "$database" ] ; then
-    exit 0 # wait for future handshake from database service unit
+if [ -f "$config_file_path" ]; then
+	# No longer to quietly in to that good night. Update the wp-config file with new DB values
+	juju-log "WordPress is already setup, just silently going away"
+	exit 0
 fi
 
-# Our protocol on this interface ensures that all or none of the
-# settings are set. But we can verify the setting or the values if
-# more error checking if desired.
+database=`relation-get database`
 user=`relation-get user`
 password=`relation-get password`
 host=`relation-get private-address`
 
-# Create an internal secret key for wordpress; this is unrelated to
-# the password generated for the admin user of wordpress
-secret_key=`pwgen 10 1`
+if [ -z "$database" ] ; then
+    exit 0
+fi
 
-juju-log "Creating appropriate upload paths and directories"
-# Setup appropriate upload paths and directories
-ln -sf /usr/share/wordpress "/var/www/$hostname"
-mkdir -p $UPLOAD_PATH
-mkdir -p "$UPLOAD_PATH/$hostname"
-chown -R root:www-data $UPLOAD_PATH
-chmod 0744 $UPLOAD_PATH
-chmod 0770 "$UPLOAD_PATH/$hostname"
-chown -R root:www-data "/var/www/$hostname/wp-content"
+secret_key=`pwgen 10 1`
+echo $secret_key > wp_secret
+source "/usr/share/charm-helper/sh/net.sh"
+
+##
+# OH COME ON WORDPRESS.ORG NO VALID SSL CERTIFICATE?
+# Psh, whatever, plain-text for now. #blamenacin
+# https://twitter.com/#!/marcoceppi/status/181570187655520260
+# I was wrong, we need to use something other than WGET, like cURL
+LATEST_WORDPRESS="http://wordpress.org/latest.tar.gz"
+DOWNLOAD=`ch_get_file "$LATEST_WORDPRESS" "http://wordpress.org/latest.tar.gz.sha1"`
+##
+
+if [ ! -f "$DOWNLOAD" ] || [ -z "$DOWNLOAD" ]; then
+	juju-log "Failed to retrieve $LATEST_WORDPRESS"
+	exit 1
+fi
+
+juju-log "Extract ALL THE FILES"
+tar -xzf $DOWNLOAD
+
+mkdir -p $wp_install_path
+
+juju-log "Move them in to place, but just 'drop' them in place."
+rsync -az wordpress/ $wp_install_path
+
+juju-log "Clean up"
+rm -rf wordpress
 
 juju-log "Writing wordpress config file $config_file_path"
 # Write the wordpress config
-cat > $config_file_path <<EOF
+cat > $config_info_path <<EOF
 <?php
 define('DB_NAME', '$database');
 define('DB_USER', '$user');
@@ -48,49 +60,51 @@ define('DB_PASSWORD', '$password');
 define('DB_HOST', '$host');
 define('SECRET_KEY', '$secret_key');
 
-#This will disable the update notification.
-define('WP_CORE_UPDATE', false);
+define('WP_CACHE', true);
+
+/*
+define('AUTH_KEY', '$secret_key');
+define('SECURE_AUTH_KEY', '$secret_key');
+define('LOGGED_IN_KEY', '$secret_key');
+define('NONCE_KEY', '$secret_key');
+*/
 
 \$table_prefix  = 'wp_';
-\$server = '$host';
-\$loginsql = '$user';
-\$passsql = '$password';
-\$base = '$database';
-\$upload_path = '/var/www/wp-uploads/$hostname';
-\$upload_url_path = 'http://$hostname/wp-uploads';
-?>
+
 EOF
+
+cat > $config_file_path <<EOF
+<?php
+
+/* That's all, stop editing! Happy blogging. */
+
+/** Absolute path to the WordPress directory. */
+if ( !defined('ABSPATH') )
+        define('ABSPATH', dirname(__FILE__) . '/');
+
+/** Pull in the config information */
+require_once(ABSPATH . 'wp-info.php');
+require_once(ABSPATH . 'wp-overrides.php');
+
+/** Sets up WordPress vars and included files. */
+require_once(ABSPATH . 'wp-settings.php');
+
+remove_filter('template_redirect', 'redirect_canonical');
+
+EOF
+
 chmod 0644 $config_file_path
+touch $config_override_path
 
-# Write the apache config
-# XXX a future branch will change this to use augtool
-apache_config_file_path="/etc/apache2/sites-available/$hostname"
-juju-log "Writing apache config file $apache_config_file_path"
-cat > $apache_config_file_path <<EOF
-<VirtualHost *:80>
-  ServerName $hostname
-  DocumentRoot /var/www/$hostname
-  Options All
-  ErrorLog /var/log/apache2/wp-error.log
-  TransferLog /var/log/apache2/wp-access.log
-  # Store uploads in /var/www/wp-uploads/$0
-  RewriteEngine On
-  RewriteRule ^/wp-uploads/(.*)$ /var/www/wp-uploads/%%{HTTP_HOST}/\$1
-</VirtualHost>
-EOF
-chmod 0644 $apache_config_file_path
-
-# Configure apache
-juju-log "Enabling apache modules: rewrite, vhost_alias"
-a2enmod rewrite
-a2enmod vhost_alias
 juju-log "Enabling apache site: $hostname"
-a2ensite $hostname
-a2dissite default
 
-# Restart apache
-juju-log "Restarting apache2 service"
-/etc/init.d/apache2 restart
+chown -R www-data.www-data $wp_install_path
+
+. hooks/config-changed
+
+# Restart nginx
+juju-log "Restarting nginx service"
+service nginx restart
 
 # Make it publicly visible, once the wordpress service is exposed
 open-port 80/tcp

@@ -1,0 +1,139 @@
+#!/bin/bash
+
+
+hostname=`unit-get public-address`
+private_name=`hostname -f`
+
+wp_install_path="/var/www/"
+config_file_path="$wp_install_path/wp-config.php"
+config_info_path="$wp_install_path/wp-info.php"
+config_override_path="$wp_install_path/wp-overrides.php"
+
+####
+## The only hook who should ever remove the NFS mount is the nfs-relation-(departed|broken) hook
+## Everyone else should just assume it's there or try to mount it. We don't want to loose people's
+## data, they get mad when that happens
+####
+
+make_bare()
+{
+	# Un-do APC
+	rm -f /etc/php5/conf.d/apc.ini
+	# IF there is an NFS mount, get everything out of it
+	if [ -f .nfs-mount ]; then # Looks like someone got fancy with NFS
+		if [ -L $wp_install_path/wp-content ]; then # Check if we actually have a symlink
+			rm -f $wp_install_path/wp-content
+			rsync -az /mnt/wordpress/wp-content $wp_install_path
+		fi
+	fi
+
+	echo "<?php" > $config_override_path
+	juju-log "We are now bare"
+}
+
+make_single()
+{
+	make_bare
+	juju-log "Installing PHP apc.ini ..."
+	rm -f /etc/php5/conf.d/apc.ini
+	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
+	do_nfs
+	juju-log "We are now single"
+}
+
+make_optimized()
+{
+	make_single
+	cat > $config_override_path <<EOF
+<?php
+define('DISALLOW_FILE_MODS', TRUE);
+EOF
+	juju-log "We are now optimized"
+}
+
+do_nfs()
+{
+	if [ -f .nfs-mount ]; then
+		# This has all the NFS mount stuff in it
+		source .nfs-mount
+		mkdir -p /mnt/wordpress
+		if grep -qs '/mnt/wordpress' /proc/mounts; then
+			juju-log "We're already mounted."
+		else
+			mount -t $MOUNT_TYPE -o $MOUNT_OPS $MOUNT_SERVER:$MOUNT_PATH /mnt/wordpress
+			if [ $? -ne 0 ]; then
+				juju-log "Could not connect to file-server"
+				exit 1 # OH THE HUMANITY OF IT ALL
+			fi
+			if [ ! -d /mnt/wordpress/wp-content ]; then
+				rsync -az $wp_install_path/wp-content /mnt/wordpress/
+			fi
+			
+			mv $wp_install_path/wp-content $wp_install_path/wp-content.bak.$(date +%Y%m%d-%H%M%S) && rm -rf $wp_install_path/wp-content
+			ln -s /mnt/wordpress/wp-content $wp_install_path
+			juju-log "Mounted NFS"
+		fi
+	else
+		juju-log "There is no nfs mount, not sure what to do, so we'll just bail"
+	fi
+}
+
+do_vcs()
+{
+	local NEW_REPO_URL="$1"
+
+	if [ -z "$NEW_REPO_URL" ]; then
+		rm -f .wp-repo
+		return 0
+	fi
+
+	if [ -f .wp-repo ]; then
+		source .wp-repo
+	else
+		REPO_URL=""
+	fi
+
+	if [ "$NEW_REPO_URL" != "$REPO_URL" ]; then
+		# We need to determine what kind of URL this is
+		if [ $(echo "$NEW_REPO_URL" | egrep -Ec "^(lp:\~|bzr:\/\/|bzr+ssh:\/\/)") -eq 1 ]; then
+			local repo_type="bzr"
+			local cmd="branch"
+		elif [ $(echo "$NEW_REPO_URL" | egrep -Ec "(^git@|^git:\/\/|\.git$)") -gt 0 ]; then
+			local repo_type="git"
+			local cmd="clone"
+		else
+			return 1
+		fi
+
+		repo_path=$(mktemp -d)
+		$repo_type $cmd $NEW_REPO_URL $repo_path
+		# Write all our new data to disk
+		cat > .wp-repo <<EOF
+#!/bin/bash
+REPO_TYPE=$repo_type
+REPO_URL=$NEW_REPO_URL
+REPO_PATH=$repo_path
+REPO_CMD=$cmd
+
+EOF
+		source .wp-repo # Just so the rest of this can run all willy nilly
+	fi
+
+	if [ ! -d "$REPO_PATH" ]; then
+		mkdir -p "$REPO_PATH"
+		$REPO_TYPE $REPO_CMD $REPO_URL $REPO_PATH
+	fi
+
+	local cwd=$(pwd)
+	cd $REPO_PATH
+	$REPO_TYPE pull
+	cd $cwd
+
+	# This will clean up anything deleted from wp-content specifically
+	rsync -az --delete $REPO_PATH/wp-content/ $wp_install_path/wp-content/
+	# This is just incase people have modifications outside of the wp-content directory
+	rsync -az $REPO_PATH/ $wp_install_path/
+
+	# This should be an --exclude flag in the RSYNC command, but I'm not quite sure how to make that work properly.
+	rm -rf $wp_install_path/.$REPO_TYPE
+}

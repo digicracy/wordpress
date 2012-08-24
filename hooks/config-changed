@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -ue
+
+source inc/common
+
+tuning_level=`config-get tuning`
+# Make it lower case
+tuning_level=${tuning_level,,}
+
+wp_content_repo=`config-get wp-content`
+expose_info=`config-get debug`
+expose_info=${expose_info,,}
+
+if [ ! -f $config_file_path ]; then
+	juju-log "Nothing to configure, since nothing is installed"
+	exit 0
+fi
+
+juju-log "Show details? $expose_info"
+
+if [ "$expose_info" == "yes" ]; then
+	rsync -az files/_debug $wp_install_path/
+else
+	rm -rf $wp_install_path/_debug
+fi
+
+juju-log "I will be using this tuning level: $tuning_level"
+
+if [ "$tuning_level" == "optimized" ]; then
+	# First and foremost, we need to disable the ability to edit
+	# themes and upload/update plugins. This breaks a scale-out
+	# environment. It's sad but true. If you want to update a plugin
+	# install a theme, etc; take a look at the README.
+	make_optimized
+elif [ "$tuning_level" == "single" ]; then
+	# We need to prepare an NFS mount, because someone is probably
+	# going to try to scale out. We also need to vamp up caching.
+	make_single
+elif [ "$tuning_level" == "bare" ]; then
+	# Okay, you know what you're doing. You're probably going to
+	# use Gluster to stream-line your files, so you don't need to
+	# disable anything. We trust you to do what you need to.
+	make_bare
+else
+	juju-log "Not sure about that tuning level."
+	exit 1
+fi
+
+do_vcs $wp_content_repo
+
+chown -R www-data.www-data $wp_install_path
+
+. hooks/restart

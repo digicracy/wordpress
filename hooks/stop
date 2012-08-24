@@ -1,3 +1,6 @@
 #!/bin/bash
-juju-log "Stopping apache"
-/etc/init.d/apache2 stop
+
+service php5-fpm stop
+service nginx stop
+
+

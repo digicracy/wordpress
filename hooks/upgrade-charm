@@ -1,1 +1,11 @@
-install
+#!/bin/bash
+
+# Run the install again!
+hooks/install
+
+wp_install_path="/var/www/"
+
+chown -R www-data.www-data $wp_install_path
+
+source hooks/config-changed
+source hooks/restart
