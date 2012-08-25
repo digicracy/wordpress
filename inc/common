@@ -149,14 +149,15 @@ do_cache()
 		return 0
 	fi
 
-	wp plugin install --path=$wp_install_path wp-ffpc
-	wp plugin activate --path=$wp_install_path wp-ffpc
-
 	source .memcache
 
+	wp plugin install --path=$wp_install_path wp-ffpc
+	sed -i -e "s/'host'=>.*/'host'=>'$CACHE_HOST',/" $wp_install_path/wp-content/plugins/wp-ffpc/wp-ffpc.php
+	wp plugin activate --path=$wp_install_path wp-ffpc
+
 	install -o www-data -g www-data -m 0644 files/charm/wordpress/advanced-cache.php $wp_install_path/wp-content/advanced-cache.php
-	sed -i -e 's/\$wp_ffpc_config\[\'host\'\]=(.*)/\$wp_ffpc_config\[\'host\'\]=\'$CACHE_HOST\';/' \
-		-e 's/\$wp_ffpc_config\[\'port\'\]=(.*)/\$wp_ffpc_config\[\'host\'\]=\'$CACHE_PORT\';/' \
+	sed -i -e "s/\$wp_ffpc_config\['host'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_HOST';/" \
+		-e "s/\$wp_ffpc_config\['port'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_PORT';/" \
 		$wp_install_path/wp-content/advanced-cache.php
-	sed -i -e 's/memcached_pass (.*)/memcached_pass $CACHE_HOST\:$CACHE_PORT;/' /etc/nginx/sites-enabled/wordpress
+	sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
 }
