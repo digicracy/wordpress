@@ -115,6 +115,16 @@ The debugging is disabled by default.
 
 # Caveats
 
+## HP Cloud
+
+At this time WordPress + Memcached don't work on HP Cloud's standard.xsmall. To get around this deploy the WordPress charm with the 
+charm to at least a `standard.small`, to do this:
+
+    juju deploy --constraints "instance-type=standard.small" wordpress
+
+This only is a problem when attempting to relate memcached to WordPress, otherwise an xsmall is _okay_ though it's really not the best 
+sized platform for running a stable WordPress install.
+
 ## Single mode and the scale-out
 
 If you're in Single mode and you want to/need to scale out, but you've been upgrading, modifying, and installing plugins + themes like
