@@ -124,7 +124,7 @@ EOF
 		$REPO_TYPE $REPO_CMD $REPO_URL $REPO_PATH
 	fi
 
-	local cwd=$(pwd)
+	local cwd=`pwd`
 	cd $REPO_PATH
 	$REPO_TYPE pull
 	cd $cwd
@@ -136,4 +136,28 @@ EOF
 
 	# This should be an --exclude flag in the RSYNC command, but I'm not quite sure how to make that work properly.
 	rm -rf $wp_install_path/.$REPO_TYPE
+}
+
+do_cache()
+{
+	if [ ! -f .memcache ]; then
+		if [ -d $wp_install_path/wp-content/plugins/wp-ffpc ]; then
+			wp plugin uninstall --path=$wp_install_path wp-ffpc
+			wp plugin delete --path=$wp_install_path wp-ffpc
+		fi
+
+		return 0
+	fi
+
+	source .memcache
+
+	wp plugin install --path=$wp_install_path wp-ffpc
+	sed -i -e "s/'host'=>.*/'host'=>'$CACHE_HOST',/" $wp_install_path/wp-content/plugins/wp-ffpc/wp-ffpc.php
+	wp plugin activate --path=$wp_install_path wp-ffpc
+
+	install -o www-data -g www-data -m 0644 files/charm/wordpress/advanced-cache.php $wp_install_path/wp-content/advanced-cache.php
+	sed -i -e "s/\$wp_ffpc_config\['host'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_HOST';/" \
+		-e "s/\$wp_ffpc_config\['port'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_PORT';/" \
+		$wp_install_path/wp-content/advanced-cache.php
+	sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
 }

@@ -8,4 +8,8 @@ wp_install_path="/var/www/"
 chown -R www-data.www-data $wp_install_path
 
 source hooks/config-changed
+
+juju-log "Upgrading WordPress core..."
+wp core update --path=$wp_install_path
+
 source hooks/restart
