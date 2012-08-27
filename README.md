@@ -157,7 +157,7 @@ You could theoretically do this, then turn off php5-fpm on all your servers and 
     juju deploy memcached
     juju add-relation memcached wordpress
     
-This setup will also synchronize the flushing of cache across all WordPress nodes, making it idea to avoid stale caches.
+This setup will also synchronize the flushing of cache across all WordPress nodes, making it ideal to avoid stale caches.
     
 ## I don't want to run three different machines for one WP install
 
