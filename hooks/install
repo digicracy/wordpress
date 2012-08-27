@@ -55,7 +55,8 @@ juju-log "Restarting Services ..."
 source hooks/restart
 
 juju-log "Installing wp-cli to make this charm's life a little easier ..."
-pear config-set auto_discover 1
-pear install wp-cli.github.com/pear/wpcli
+git clone https://github.com/wp-cli/wp-cli.git /usr/src/wp-cli
+cd /usr/src/wp-cli
+utils/dev-build
 
 juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"
