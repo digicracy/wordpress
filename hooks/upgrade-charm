@@ -5,11 +5,13 @@ hooks/install
 
 wp_install_path="/var/www/"
 
-chown -R www-data.www-data $wp_install_path
+if [ -f "$wp_install_path/wp-config.php" ]; then
+	chown -R www-data.www-data $wp_install_path
 
-source hooks/config-changed
+	hooks/config-changed
 
-juju-log "Upgrading WordPress core..."
-wp core update --path=$wp_install_path
+	juju-log "Upgrading WordPress core..."
+	wp core update --path=$wp_install_path
+fi
 
-source hooks/restart
+hooks/restart

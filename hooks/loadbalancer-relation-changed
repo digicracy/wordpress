@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source inc/common
+
+secret_key=`relation-get secret-key`
+
+if [ "$secret_key" = "" ]; then
+	if [ -f ".wp-secret" ]; then
+		relation-set secret-key=`cat .wp-secret`
+	fi
+else
+	echo $secret_key > .wp-secret
+fi
+
+if [ -f "$config_info_path" ]; then
+	secret_key=`cat .wp-secret`
+	sed -i -e "s/define\('SECRET_KEY',.*\);/define\('SECRET_KEY', '$secret_key'\)\;/" $config_info_path
+fi

@@ -21,8 +21,8 @@ if [ -z "$database" ] ; then
     exit 0
 fi
 
-secret_key=`pwgen 10 1`
-echo $secret_key > wp_secret
+secret_key=`cat .wp-secret`
+
 source "/usr/share/charm-helper/sh/net.sh"
 
 ##
@@ -30,8 +30,8 @@ source "/usr/share/charm-helper/sh/net.sh"
 # Psh, whatever, plain-text for now. #blamenacin
 # https://twitter.com/#!/marcoceppi/status/181570187655520260
 # I was wrong, we need to use something other than WGET, like cURL
-LATEST_WORDPRESS="http://wordpress.org/latest.tar.gz"
-DOWNLOAD=`ch_get_file "$LATEST_WORDPRESS" "http://wordpress.org/latest.tar.gz.sha1"`
+LATEST_WORDPRESS="https://wordpress.org/latest.tar.gz"
+DOWNLOAD=`ch_get_file "$LATEST_WORDPRESS" "https://wordpress.org/latest.tar.gz.sha1"`
 ##
 
 if [ ! -f "$DOWNLOAD" ] || [ -z "$DOWNLOAD" ]; then
