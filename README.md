@@ -150,15 +150,15 @@ of units to add, so to add three more units:
 
 Why not? We could ALL use more caching. Deploy a memcached server and relate it to your WordPress service to add memcache caching. This will 
 automagically install [WP-FFPC](http://wordpress.org/extend/plugins/wp-ffpc/) (regardless of your tuning settings) and configure it to cache 
-rendered pages to the memcache server. In addition to this layer of caching, Nginx will be pull directly from memcache bypassing PHP altogether. 
-You could theoretically do this, then turn off php5-fpm on all your servers and just have Nginx serve static content during peak times 
-(though, you wouldn't be able to access the admin panel or any uncached pages - it's just a potential scenario).
+rendered pages to the memcache server. In addition to this layer of caching, Nginx will pull directly from memcached bypassing PHP altogether. 
+You could theoretically then turn off php5-fpm on all of your servers and just have Nginx serve static content via memcached (though, you 
+wouldn't be able to access the admin panel or any uncached pages - it's just a potential scenario).
 
     juju deploy memcached
     juju add-relation memcached wordpress
     
 This setup will also synchronize the flushing of cache across all WordPress nodes, making it ideal to avoid stale caches.
-    
+
 ## I don't want to run three different machines for one WP install
 
 There is a "hack" that will allow you to deploy multiple full services to the same machine as the bootstrap node, this has nothing to do with
