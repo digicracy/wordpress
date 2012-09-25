@@ -96,7 +96,7 @@ EOF
 chmod 0644 $config_file_path
 touch $config_override_path
 
-juju-log "Enabling apache site: $hostname"
+juju-log "Resetting permissions"
 
 chown -R www-data.www-data $wp_install_path
 
