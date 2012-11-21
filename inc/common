@@ -1,4 +1,23 @@
 #!/bin/bash
+#
+#    common - Common functions
+#
+#    Copyright (C) 2012  Marco Ceppi
+#    Author: Marco Ceppi <marco@ceppi.net>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 hostname=`unit-get public-address`
 private_name=`hostname -f`
@@ -132,9 +151,12 @@ EOF
 	repo_type=`ch_detect_vcs $REPO_PATH`
 
 	if [ ! -d "$REPO_PATH/wp-content" ]; then
+		# This is just someone who has their source control at the root level of the repo.
 		wp_content_path="$REPO_PATH/wp-content"
 		rsync -az --delete --exclude ".$repo_type/*" $REPO_PATH/ $wp_install_path/wp-content/
 	else
+		# This is a repo with a wp-content folder. So we'll move that then everything else they have in that repo
+		# to the web root. OMG requirement.
 		rsync -az --delete --exclude ".$repo_type/*" $REPO_PATH/wp-content/ $wp_install_path/wp-content/
 		# This is just incase people have modifications outside of the wp-content directory
 		rsync -az --exclude ".$repo_type/*" $REPO_PATH/ $wp_install_path/

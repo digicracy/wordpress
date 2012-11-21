@@ -18,29 +18,20 @@ password=`relation-get password`
 host=`relation-get private-address`
 
 if [ -z "$database" ] ; then
-    exit 0
+	exit 0
 fi
-
-secret_key=`cat .wp-secret`
 
 source "/usr/share/charm-helper/sh/net.sh"
 
-##
-# OH COME ON WORDPRESS.ORG NO VALID SSL CERTIFICATE?
-# Psh, whatever, plain-text for now. #blamenacin
-# https://twitter.com/#!/marcoceppi/status/181570187655520260
-# I was wrong, we need to use something other than WGET, like cURL
-LATEST_WORDPRESS="https://wordpress.org/latest.tar.gz"
-DOWNLOAD=`ch_get_file "$LATEST_WORDPRESS" "https://wordpress.org/latest.tar.gz.sha1"`
-##
+payload=`ch_get_file "https://wordpress.org/latest.tar.gz" "https://wordpress.org/latest.tar.gz.sha1"`
 
-if [ ! -f "$DOWNLOAD" ] || [ -z "$DOWNLOAD" ]; then
-	juju-log "Failed to retrieve $LATEST_WORDPRESS"
+if [ ! -f "$payload" ] || [ -z "$payload" ]; then
+	juju-log "Failed to retrieve latest.tar.gz"
 	exit 1
 fi
 
-juju-log "Extract ALL THE FILES"
-tar -xzf $DOWNLOAD
+juju-log "Extract ALL THE FILES!"
+tar -xzf $payload
 
 mkdir -p $wp_install_path
 
@@ -49,6 +40,8 @@ rsync -az wordpress/ $wp_install_path
 
 juju-log "Clean up"
 rm -rf wordpress
+
+secret_key=`cat .wp-secret`
 
 juju-log "Writing wordpress config file $config_file_path"
 # Write the wordpress config
@@ -103,8 +96,8 @@ chown -R www-data.www-data $wp_install_path
 . hooks/config-changed
 
 # Restart nginx
-juju-log "Restarting nginx service"
-service nginx restart
+juju-log "Restarting $engine service"
+service $engine restart
 
 # Make it publicly visible, once the wordpress service is exposed
 open-port 80/tcp
