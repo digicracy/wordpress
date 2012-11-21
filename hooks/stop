@@ -2,5 +2,3 @@
 
 service php5-fpm stop
 service nginx stop
-
-
