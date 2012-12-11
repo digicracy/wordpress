@@ -65,7 +65,7 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	
 	juju-log "Installing Apache loadbal config..."
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_sites-enabled_loadbalancer /etc/apache2/sites-available/loadbalancer
-	sed -i -e 's/^  ServerName .*/  ServerName ${unit_address}/' /etc/apache2/sites-available/loadbalancer
+	sed -i -e "s/^  ServerName .*/  ServerName ${unit_address}/" /etc/apache2/sites-available/loadbalancer
 	a2ensite loadbalancer
 	
 	juju-log "Installing Apache wordpress config..."
