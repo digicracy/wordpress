@@ -41,6 +41,7 @@ tuning_level=`config-get tuning`
 wp_content_repo=`config-get wp-content`
 expose_info=`config-get debug`
 engine=`config-get engine`
+unit_address=`unit-get private-address`
 
 # Make it lower case
 tuning_level=${tuning_level,,}
@@ -57,6 +58,16 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	a2enmod actions fastcgi alias
 
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_conf-d_php5-fpm.conf /etc/apache2/conf.d/php5-fpm.conf
+	
+	juju-log "Installing Apache loadbal config..."
+	install -o root -g root -m 0644 files/charm/apache/etc_apache2_sites-enabled_loadbalancer /etc/apache2/sites-available/loadbalancer
+	sed -i -e 's/^  ServerName .*/  ServerName ${unit_address}/' /etc/apache2/sites-available/loadbalancer
+	a2ensite loadbalancer
+	
+	juju-log "Installing Apache wordpress config..."
+	install -o root -g root -m 0644 files/charm/apache/etc_apache2_sites-enabled_wordpress /etc/apache2/sites-available/wordpress
+	a2ensite wordpress
+	
 	echo "apache2" > .web-engine
 else
 	service apache2 stop
