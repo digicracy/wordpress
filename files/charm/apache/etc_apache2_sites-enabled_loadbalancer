@@ -3,8 +3,6 @@
 ## the proxy balancer setups, etc. Untill then there's not need to proxypass
 ## to another apache virtual host 
 
-Listen 80
-
 <VirtualHost *:80>
   ServerName localhost
   ServerAlias *

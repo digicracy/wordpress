@@ -48,8 +48,12 @@ tuning_level=${tuning_level,,}
 expose_info=${expose_info,,}
 engine=${engine,,}
 
+
 if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
-	service nginx stop
+	if [ -f .web-engine ]; then
+		web_engine=`cat .web-engine`
+		service $web_engine stop
+	fi
 	apt-get -y purge nginx
 	apt-get install -y apache2-mpm-worker libapache2-mod-fastcgi
 	service apache2 stop
@@ -70,7 +74,12 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	
 	echo "apache2" > .web-engine
 else
-	service apache2 stop
+	if [ -f .web-engine ]; then
+		web_engine=`cat .web-engine`
+		service $web_engine stop
+	fi
+	sed -i -e "s/# deb \(.*\) multiverse/deb \1 multiverse/g" /etc/apt/sources.list #for libapache2-mod-fastcgi
+	apt-get update
 	apt-get -y purge apache2* libapache2*
 	apt-get install -y nginx
 	service nginx stop
