@@ -94,11 +94,7 @@ juju-log "Resetting permissions"
 chown -R www-data.www-data $wp_install_path
 
 . hooks/config-changed
-
-engine=`engine`
-# Restart $engine
-juju-log "Restarting $engine service"
-service $engine restart
+. hooks/restart
 
 # Make it publicly visible, once the wordpress service is exposed
 open-port 80/tcp
