@@ -42,7 +42,7 @@ if engine == 'apache2':
 <Proxy balancer://backend>
   BalancerMember http://127.0.0.1:8080/
 """
-    server_line = "  BalancerMember http://%s:8080/"
+    server_line = "  BalancerMember http://%s:8080/\n"
     server_end = """
   ProxySet lbmethod=bybusyness
 </Proxy>

@@ -184,5 +184,9 @@ do_cache()
 	sed -i -e "s/\$wp_ffpc_config\['host'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_HOST';/" \
 		-e "s/\$wp_ffpc_config\['port'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_PORT';/" \
 		$wp_install_path/wp-content/advanced-cache.php
-	sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
+
+	engine=`cat .web-engine`
+	if [ "$engine" == "nginx" ]; then
+		sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
+	fi
 }
