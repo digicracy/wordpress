@@ -37,7 +37,7 @@ except IOError:
     engine = 'nginx'
 
 if engine == 'apache2':
-    conf_name = "loadbalancer.conf"
+    conf_name = "loadbalancer"
     servers = """
 <Proxy balancer://backend>
   BalancerMember http://127.0.0.1:8080/
