@@ -30,7 +30,9 @@ install -o root -g root -m 0644 files/charm/php/php5-fpm_pool.d_www.conf /etc/ph
 rsync -az /var/lib/php5 /mnt/ && rm -rf /var/lib/php5 && ln -s /mnt/php5 /var/lib/
 
 juju-log "Creating random secret key ..."
-pwgen -s 10 1 > .wp-secret
+if [ ! -f .wp-secret ]; then
+	pwgen -s 10 1 > .wp-secret
+fi
 
 juju-log "Installing wp-cli to make this charm's life a little easier ..."
 save_pwd=`pwd`

@@ -60,6 +60,8 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	apt-get install -y apache2-mpm-worker libapache2-mod-fastcgi
 	service apache2 stop
 
+	rm -f /var/www/index.html
+
 	rm -f /etc/apache2/sites-enabled/*
 	a2enmod actions fastcgi alias proxy_balancer proxy_http headers
 

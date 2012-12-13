@@ -4,6 +4,8 @@ Listen *:8080
   ServerName localhost
   ServerAlias *
   ServerAdmin webmaster@localhost
+  
+  UseCanonicalName Off
 
   DocumentRoot /var/www
   <Directory /var/www>
