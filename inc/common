@@ -1,5 +1,23 @@
 #!/bin/bash
-
+#
+#    common - Common functions
+#
+#    Copyright (C) 2012  Marco Ceppi
+#    Author: Marco Ceppi <marco@ceppi.net>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 hostname=`unit-get public-address`
 private_name=`hostname -f`
@@ -12,8 +30,13 @@ config_override_path="$wp_install_path/wp-overrides.php"
 ####
 ## The only hook who should ever remove the NFS mount is the nfs-relation-(departed|broken) hook
 ## Everyone else should just assume it's there or try to mount it. We don't want to loose people's
-## data, they get mad when that happens
+## data, they get mad when that happens :(
 ####
+
+engine()
+{
+	echo `cat .web-engine`
+}
 
 make_bare()
 {
@@ -37,8 +60,13 @@ make_single()
 	juju-log "Installing PHP apc.ini ..."
 	rm -f /etc/php5/conf.d/apc.ini
 	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
+
+	## We do NFS here, because Configuration changes cascade. So to get to Optimzied you *must* first 
+	## make "single" (and by association, "bare"). Since nfs is both a single and optimized thing we do it now.
+
 	do_nfs
-	juju-log "We are now single"
+
+	juju-log "We are now single, ALL THE SINGLE UNITS ALL THE SINGLE UNITS"
 }
 
 make_optimized()
@@ -48,7 +76,7 @@ make_optimized()
 <?php
 define('DISALLOW_FILE_MODS', TRUE);
 EOF
-	juju-log "We are now optimized"
+	juju-log "We are now optimized prime"
 }
 
 do_nfs()
@@ -80,7 +108,9 @@ do_nfs()
 
 do_vcs()
 {
-	local NEW_REPO_URL="$1"
+	source "/usr/share/charm-helper/bash/vcs.bash"
+
+	local NEW_REPO_URL=${1:-""}
 
 	if [ -z "$NEW_REPO_URL" ]; then
 		rm -f .wp-repo
@@ -95,47 +125,42 @@ do_vcs()
 
 	if [ "$NEW_REPO_URL" != "$REPO_URL" ]; then
 		# We need to determine what kind of URL this is
-		if [ $(echo "$NEW_REPO_URL" | egrep -Ec "^(lp:\~|bzr:\/\/|bzr+ssh:\/\/)") -eq 1 ]; then
-			local repo_type="bzr"
-			local cmd="branch"
-		elif [ $(echo "$NEW_REPO_URL" | egrep -Ec "(^git@|^git:\/\/|\.git$)") -gt 0 ]; then
-			local repo_type="git"
-			local cmd="clone"
-		else
+
+		repo_path=`ch_fetch_repo $NEW_REPO_URL`
+		if [ $? -ne 0 ]; then
+			juju-log "Failed to fetch repo, charm-helper/bash/vcs.bash exited with $?"
 			return 1
 		fi
 
-		repo_path=$(mktemp -d)
-		$repo_type $cmd $NEW_REPO_URL $repo_path
 		# Write all our new data to disk
 		cat > .wp-repo <<EOF
 #!/bin/bash
-REPO_TYPE=$repo_type
 REPO_URL=$NEW_REPO_URL
 REPO_PATH=$repo_path
-REPO_CMD=$cmd
-
 EOF
 		source .wp-repo # Just so the rest of this can run all willy nilly
+	else
+		# Lets just try and do a fetch
+		ch_update_repo "$REPO_PATH"
+		if [ $? -ne 0 ]; then
+			juju-log "Failed to update repository, charm-helper/bash/vcs.bash exited with $?"
+			return 2
+		fi
 	fi
 
-	if [ ! -d "$REPO_PATH" ]; then
-		mkdir -p "$REPO_PATH"
-		$REPO_TYPE $REPO_CMD $REPO_URL $REPO_PATH
+	repo_type=`ch_detect_vcs $REPO_PATH`
+
+	if [ ! -d "$REPO_PATH/wp-content" ]; then
+		# This is just someone who has their source control at the root level of the repo.
+		wp_content_path="$REPO_PATH/wp-content"
+		rsync -az --delete --exclude ".$repo_type/*" $REPO_PATH/ $wp_install_path/wp-content/
+	else
+		# This is a repo with a wp-content folder. So we'll move that then everything else they have in that repo
+		# to the web root. OMG requirement.
+		rsync -az --delete --exclude ".$repo_type/*" $REPO_PATH/wp-content/ $wp_install_path/wp-content/
+		# This is just incase people have modifications outside of the wp-content directory
+		rsync -az --exclude ".$repo_type/*" $REPO_PATH/ $wp_install_path/
 	fi
-
-	local cwd=`pwd`
-	cd $REPO_PATH
-	$REPO_TYPE pull
-	cd $cwd
-
-	# This will clean up anything deleted from wp-content specifically
-	rsync -az --delete $REPO_PATH/wp-content/ $wp_install_path/wp-content/
-	# This is just incase people have modifications outside of the wp-content directory
-	rsync -az $REPO_PATH/ $wp_install_path/
-
-	# This should be an --exclude flag in the RSYNC command, but I'm not quite sure how to make that work properly.
-	rm -rf $wp_install_path/.$REPO_TYPE
 }
 
 do_cache()
@@ -159,5 +184,9 @@ do_cache()
 	sed -i -e "s/\$wp_ffpc_config\['host'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_HOST';/" \
 		-e "s/\$wp_ffpc_config\['port'\]=.*/\$wp_ffpc_config\['host'\]='$CACHE_PORT';/" \
 		$wp_install_path/wp-content/advanced-cache.php
-	sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
+
+	engine=`cat .web-engine`
+	if [ "$engine" == "nginx" ]; then
+		sed -i -e "s/memcached_pass .*/memcached_pass $CACHE_HOST\:$CACHE_PORT;/" /etc/nginx/sites-enabled/wordpress
+	fi
 }

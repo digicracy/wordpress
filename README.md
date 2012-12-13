@@ -113,6 +113,21 @@ to disable debugging:
 
 The debugging is disabled by default.
 
+## Engine
+
+By default the WordPress charm will install nginx and php5-fpm to serve pages. In the event you do not wish to use nginx - for whatever reason - you can switch to Apache2.
+This will provide a near identical workflow as if you were using nginx with one key difference: memcached. In nginx, the cached pages are served from memcached prior to
+hitting the php contents, this isn't possible with apache2. As such memcached support still works, since it falls back to the WordPress caching engine, but it's not as robust.
+Otherwise, Apache2 will still perform balancing and everything else mentioned above. You can switch between engines at will with the following:
+
+    juju set wordpress engine=apache2
+
+Then back to nginx:
+
+    juju set wordpress engine=nginx
+
+Any other value will result in the default (nginx) being used.
+
 # Caveats
 
 ## HP Cloud
@@ -146,7 +161,7 @@ of units to add, so to add three more units:
 
     juju add-unit -n3 wordpress
 
-## I want more caching, I want MEMCACHING!
+## I want more caching, I want MEMCACH(ED)ING!
 
 Why not? We could ALL use more caching. Deploy a memcached server and relate it to your WordPress service to add memcache caching. This will 
 automagically install [WP-FFPC](http://wordpress.org/extend/plugins/wp-ffpc/) (regardless of your tuning settings) and configure it to cache 
@@ -158,6 +173,9 @@ wouldn't be able to access the admin panel or any uncached pages - it's just a p
     juju add-relation memcached wordpress
     
 This setup will also synchronize the flushing of cache across all WordPress nodes, making it ideal to avoid stale caches.
+
+A small note, when using the Apache2 engine and memcache, all request will still be sent to WordPress via Apache where typical caching 
+procedures will take place and wp-ffpc will render the memcached page.
 
 ## I don't want to run three different machines for one WP install
 

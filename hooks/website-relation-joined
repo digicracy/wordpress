@@ -1,2 +1,4 @@
 #!/bin/sh
-relation-set port=80 hostname=`unit-get private-address`
+
+# Bypass the loadbalancer for $engine and instead just hit the unit
+relation-set port=8080 hostname=`unit-get private-address`

@@ -1,4 +1,5 @@
 #!/bin/bash
 
+engine=`cat .web-engine`
 service php5-fpm restart
-service nginx restart
+service $engine restart
