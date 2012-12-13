@@ -33,5 +33,5 @@ fi
 
 if [ -f "$config_info_path" ]; then
 	secret_key=`cat .wp-secret`
-	sed -i -e "s/define\('SECRET_KEY',.*\);/define\('SECRET_KEY', '$secret_key'\)\;/" $config_info_path
+	sed -i -e "s/define('SECRET_KEY',.*/define('SECRET_KEY', '$secret_key')\;/" $config_info_path
 fi
