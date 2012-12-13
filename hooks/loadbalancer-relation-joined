@@ -57,7 +57,7 @@ if engine == 'apache2':
   ServerAlias *
   LogLevel warn
   ErrorLog ${APACHE_LOG_DIR}/wordpress-balancer-error.log
-
+  RequestHeader set Host "%{SERVER_NAME}e"
   <Location />
     Order allow,deny
     Allow from all

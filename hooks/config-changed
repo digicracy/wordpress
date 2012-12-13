@@ -61,7 +61,7 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	service apache2 stop
 
 	rm -f /etc/apache2/sites-enabled/*
-	a2enmod actions fastcgi alias proxy_balancer proxy_http
+	a2enmod actions fastcgi alias proxy_balancer proxy_http headers
 
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_conf-d_php5-fpm.conf /etc/apache2/conf.d/php5-fpm.conf
 	
