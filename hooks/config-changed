@@ -4,32 +4,32 @@ set -ue
 
 source inc/common
 
-## 
+##
 # This is where things can get a bit hectic. So this long blog is just to
 # help preface what's going on here. When this hook fires it will always
 # try to re-configure the entire unit. It's like a GOD hook, triggering
 # or using data from every other hook with the exception of the install
 # and upgrade-charm hooks.
 #
-# First, get a bunch of configuration values. The idea being this is should 
+# First, get a bunch of configuration values. The idea being this is should
 # be the only place that config-get is run as it's "unreliable" anywhere else
 # Data should then either be passed to functions or written down - you know
 # "YOU SHOULD ALWAYS LEAVE A NOTE!"
 #
-# From here, the web engine will either be updated or left alone. We always 
+# From here, the web engine will either be updated or left alone. We always
 # assume it's going to be nginx unless you specify apache. So if you put
 # "lighttpd" or "i love apache" you're going to get nginx, so don't do that.
-# Configuration files are re-written every time. This is to make sure that 
-# any changes to long running units overtime are included. It may seem 
-# expensive to keep re-writing the same files but in the end having all 
+# Configuration files are re-written every time. This is to make sure that
+# any changes to long running units overtime are included. It may seem
+# expensive to keep re-writing the same files but in the end having all
 # the units in a sane and identical state is worth it.
 #
 # Next, we do some small file moving around. Just for debug stuff.
 #
-# After that tuning levels are decided and executed. This is a bit more 
+# After that tuning levels are decided and executed. This is a bit more
 # involved than just running a function, check inc/common for that craziness
 #
-# After that, it's time to get any user-defined content! do_vcs does that 
+# After that, it's time to get any user-defined content! do_vcs does that
 # and a little more
 #
 # Caching stuff, basically "DO WE HAVE MEMCACHED, GOOD LETS DO CONFIG"
@@ -66,16 +66,16 @@ if [ "$engine" == "apache" ] || [ "$engine" == "apache2" ]; then
 	a2enmod actions fastcgi alias proxy_balancer proxy_http headers
 
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_conf-d_php5-fpm.conf /etc/apache2/conf.d/php5-fpm.conf
-	
+
 	juju-log "Installing Apache loadbal config..."
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_sites-enabled_loadbalancer /etc/apache2/sites-available/loadbalancer
 	sed -i -e "s/^  ServerName .*/  ServerName ${unit_address}/" /etc/apache2/sites-available/loadbalancer
 	a2ensite loadbalancer
-	
+
 	juju-log "Installing Apache wordpress config..."
 	install -o root -g root -m 0644 files/charm/apache/etc_apache2_sites-enabled_wordpress /etc/apache2/sites-available/wordpress
 	a2ensite wordpress
-	
+
 	echo "apache2" > .web-engine
 else
 	if [ -f .web-engine ]; then

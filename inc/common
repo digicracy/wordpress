@@ -38,6 +38,26 @@ engine()
 	echo `cat .web-engine`
 }
 
+total_memory()
+{
+  echo $((`awk '/MemTotal/{print $2}' /proc/meminfo` / 1024))
+}
+
+apc_shm_size()
+{
+  all_memory=`total_memory`
+  if [ -z $all_memory ]; then
+    echo 256 # Play it safe, no memory was reported.
+    return 0
+  fi
+
+  if [ $all_memory -gt 1280 ]; then
+    echo 1024
+  else
+    echo $((all_memory * 80 / 100))
+  fi
+}
+
 make_bare()
 {
 	# Un-do APC
@@ -60,6 +80,9 @@ make_single()
 	juju-log "Installing PHP apc.ini ..."
 	rm -f /etc/php5/conf.d/apc.ini
 	install -o root -g root -m 0644 files/charm/php/php5_conf.d_apc.ini /etc/php5/conf.d/apc.ini
+
+	shm_size=`apc_shm_size`
+	sed -i -e "s/^apc\.shm_size=.*$/apc.shm_size=${shm_size}M/" /etc/php5/conf.d/apc.ini
 
 	## We do NFS here, because Configuration changes cascade. So to get to Optimzied you *must* first 
 	## make "single" (and by association, "bare"). Since nfs is both a single and optimized thing we do it now.
