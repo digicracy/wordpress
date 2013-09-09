@@ -38,10 +38,14 @@ fi
 
 juju-log "Installing wp-cli to make this charm's life a little easier ..."
 git clone https://github.com/wp-cli/wp-cli.git /usr/src/wp-cli
-cd /usr/src/wp-cli
-# 20120926: v0.6.0 is confirmed working, so use it rather than alpha.
-git reset --hard v0.6.0
-git submodule update --init
-utils/dev-build
+# other hooks call hooks/install and don't expect the CWD to change so
+# run this section in a subshell
+( 
+	cd /usr/src/wp-cli
+	# 20120926: v0.6.0 is confirmed working, so use it rather than alpha.
+	git reset --hard v0.6.0
+	git submodule update --init
+	utils/dev-build
+)
 
 juju-log "So, environment is setup. We'll wait for some hooks to fire off before we get all crazy"
