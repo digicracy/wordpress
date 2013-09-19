@@ -111,7 +111,7 @@ do_nfs()
 		if grep -qs '/mnt/wordpress' /proc/mounts; then
 			juju-log "We're already mounted."
 		else
-			mount -t $MOUNT_TYPE -o $MOUNT_OPS $MOUNT_SERVER:$MOUNT_PATH /mnt/wordpress
+			mount -t $MOUNT_TYPE $MOUNT_OPS $MOUNT_SERVER:$MOUNT_PATH /mnt/wordpress
 			if [ $? -ne 0 ]; then
 				juju-log "Could not connect to file-server"
 				exit 1 # OH THE HUMANITY OF IT ALL
@@ -119,7 +119,7 @@ do_nfs()
 			if [ ! -d /mnt/wordpress/wp-content ]; then
 				rsync -az $wp_install_path/wp-content /mnt/wordpress/
 			fi
-			
+
 			mv $wp_install_path/wp-content $wp_install_path/wp-content.bak.$(date +%Y%m%d-%H%M%S) && rm -rf $wp_install_path/wp-content
 			ln -s /mnt/wordpress/wp-content $wp_install_path
 			juju-log "Mounted NFS"

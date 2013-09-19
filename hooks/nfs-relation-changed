@@ -15,6 +15,10 @@ if [ -z "$fstype" ] ; then
     exit 0
 fi
 
+if [ ! -z "$options" ]; then
+    options="-o $options"
+fi
+
 # Write this out to our .nfs-mount file
 cat > .nfs-mount <<EOF
 #!/bin/bash
