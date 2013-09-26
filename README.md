@@ -179,15 +179,16 @@ procedures will take place and wp-ffpc will render the memcached page.
 
 ## I don't want to run three different machines for one WP install
 
-There is a "hack" that will allow you to deploy multiple full services to the same machine as the bootstrap node, this has nothing to do with
-the charm, but it's something that comes up more than once. Use this, of course, at your own risk. At any time the Juju developers may smart
-up and decide to remove this configuration option from the `environments.yaml` file. Prior to your first deployment you'll need to add the
-following line to your Juju Environments file:
+If you're just looking to run a personal blog and want to save money you can run all of this on a single node, here's an entire single node installation from scratch
 
-    placement: local
+    juju bootstrap
+    juju deploy --to 0 wordpress
+    juju deploy --to 0 mysql
+    juju add-relation wordpress mysql 
+    juju expose wordpress
 
-This will say "Everything that you deploy, will go on the bootstrap node". Make sure you plan to have a big enough bootstrap node to house
-both your database and WordPress install. After you've bootstrap'd the environment, deploy the MySQL and WordPress charms like you normally
-would. Instead of seeing three nodes you'll only see one, but both of your services will have been deployed. *FROM THIS POINT* you should
-either remove or comment out the `placement` line in the environments file. This will prevent issues from occurring when you try to deploy
-additional services or try to scale out existing services.
+This will run everything on one node, however we still have the flexibility to grow horizontally. If your blog gets more traffic and you need to scale:
+
+    juju add-unit wordpress
+
+Since we're omitting the `--to` command Juju will fire up a new dedicated machine for Wordpress and relate it. You can also `remove-unit` when the surge is over and go back to a cheaper one node set up. 
