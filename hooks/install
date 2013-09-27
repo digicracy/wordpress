@@ -9,7 +9,7 @@ apt-get -y install php5-memcache mysql-client pwgen php5 php5-fpm \
 	php-apc mailutils php-mail sysstat php5-mysql php5-mcrypt php5-memcache \
 	charm-helper-sh php5-curl rsync nfs-common git-core mktemp
 
-modprobe nfs
+modprobe nfs || true
 
 juju-log "Making /mnt/tmp dir ..."
 mkdir -p /mnt/tmp
@@ -40,7 +40,7 @@ juju-log "Installing wp-cli to make this charm's life a little easier ..."
 git clone https://github.com/wp-cli/wp-cli.git /usr/src/wp-cli
 # other hooks call hooks/install and don't expect the CWD to change so
 # run this section in a subshell
-( 
+(
 	cd /usr/src/wp-cli
 	# 20120926: v0.6.0 is confirmed working, so use it rather than alpha.
 	git reset --hard v0.6.0
