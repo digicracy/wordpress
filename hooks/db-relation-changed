@@ -15,7 +15,7 @@ fi
 database=`relation-get database`
 user=`relation-get user`
 password=`relation-get password`
-host=`relation-get private-address`
+host=`relation-get host`
 
 if [ -z "$database" ] ; then
 	exit 0
